@@ -4,7 +4,7 @@
 This project aims to predict the outcomes of NFL games using machine learning techniques. By analyzing historical NFL game data, the model uses **logistic regression** to forecast the results of upcoming games. The goal is to provide accurate predictions based on key factors and insights from previous matchups.
 
 ## This week's predictions:
-![Week 6](Week_6_Predictions.jpeg)
+![Week 6](Week6Predictions.jpeg)
 
 ## Features
 - **Data Analysis**: Processes and analyzes historical NFL game data using **pandas**.
