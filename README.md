@@ -1,67 +1,76 @@
-# NFL Result Predictor || [```Open in Colab```](https://colab.research.google.com/github/alexmekhail/NFLResultPredictor/blob/main/NFL_Result_Predictor.ipynb)
+# NFLResultPredictor
 
-## Overview
-This project aims to predict the outcomes of NFL games using machine learning techniques. By analyzing historical NFL game data, the model uses **logistic regression** to forecast the results of upcoming games. The goal is to provide accurate predictions based on key factors and insights from previous matchups.
+A predictive system for NFL outcomes, updated and improved for the **2025 season**.  
+Uses machine learning to estimate win probabilities and generate picks based on game spreads and historical trends.
 
-## This week's predictions:
-![Week 6](Week6Predictions.jpeg)
+---
 
-## Features
-- **Data Analysis**: Processes and analyzes historical NFL game data using **pandas**.
-- **Machine Learning**: Implements **logistic regression** to predict game outcomes.
-- **Model Evaluation**: Evaluates model accuracy and iterates for improved performance.
-- **Interactive Colab Notebook**: Use and modify the model in real-time with Google Colab.
+## 🚀 New for 2025 Season
 
-## Technologies
-- Python
-- pandas
-- scikit-learn (for logistic regression)
-- Google Colab (for notebook interactivity)
+- Added **prediction of outright winners** (not just probabilities) with configurable thresholds.  
+- Streamlit UI enhanced to display matchups, predicted winners, confidence scores, and interactive bar charts.  
+- Improved feature extraction with robust handling of nfl_data_py schema changes.  
+- End-to-end pipeline for fetching schedules, training models, generating weekly predictions, and visualizing results.  
+- Modular design to support richer features in the future (rolling stats, injuries, weather, backtesting, etc.).
 
-## Setup
-To run this project locally:
+---
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/alexmekhail/NFLResultPredictor.git
-2. Install the required dependencies:
-   ```bash
-   pip install pandas scikit-learn
-3. Open the project in your favorite IDE or directly use the provided Colab notebook.
+## 🔧 Setup & Usage
 
-## Usage
-Download or collect NFL historical game data.
-Clean and prepare the data using pandas.
-Train the logistic regression model on training data.
-Use the model to predict the outcomes of future NFL games.
-Evaluate the model’s accuracy and refine it as needed.
+### Prerequisites
+- Python 3.11 (recommended for compatibility with dependencies)  
+- Git  
+- VS Code or another IDE (optional but recommended)
 
-## Example Code
-Here is an example of how to train the logistic regression model:
-```python
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
+### Installation
+```
+git clone https://github.com/alexmekhail/NFLResultPredictor.git
+cd NFLResultPredictor
 
-# Split the data into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+python3.11 -m venv .venv
+source .venv/bin/activate  # macOS/Linux
+# .\.venv\Scripts\Activate.ps1  # Windows PowerShell
 
-# Initialize and train the model
-model = LogisticRegression()
-model.fit(X_train, y_train)
+pip install --upgrade pip setuptools wheel
+pip install -r requirements.txt
 
-# Predict and evaluate
-predictions = model.predict(X_test)
-accuracy = accuracy_score(y_test, predictions)
-print(f"Model Accuracy: {accuracy * 100:.2f}%")
+cp .env.example .env
 ```
 
-## Contributions
-Contributions are welcome! If you'd like to improve this project, feel free to fork the repository and submit a pull request. You can also open an issue if you find bugs or have suggestions.
+## 🏋️ Training a Model
 
-To contribute:
-1. Fork the repository.
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4. Push to the branch (`git push origin feature/AmazingFeature`).
-5. Open a pull request.
+```
+python scripts/refresh_all.py
+```
+This fetches current season data, builds features, trains the baseline model, and saves metrics to models/reports/.
+
+## 🎲 Making Predictions
+```
+python src/predict.py --season 2025 --week 1
+```
+Generates win probabilities and predicted winners for Week 1, saving results to data/processed/.
+
+## 📊 Viewing Results in the UI
+```
+streamlit run scripts/serve_streamlit.py
+```
+Choose a predictions file (e.g. predictions_2025_wk1.csv)
+
+Browse probabilities, picks, and confidence scores
+
+Visualize results with an interactive bar chart
+
+## 📈 Features & Modeling Notes
+- Baseline features: betting spread & home-field indicator
+- Predictions: threshold-based winner assignment (default 0.5, adjustable)
+- Dynamic feature mapping: supports schedule schema changes automatically
+- Streamlit dashboard: tabular results, bar charts, and CSV download
+- Extensible design: add new features, swap models, or expand evaluation
+
+## 🎯 Roadmap
+- Add rolling team statistics (yards/play, turnovers, rest days, EPA/play)
+- Incorporate injury and weather data
+- Introduce advanced models (XGBoost / LightGBM ensembles)
+- Calibrate probability outputs for better accuracy
+- Implement walk-forward backtesting for season-long evaluation
+-Automate weekly retraining and predictions with GitHub Actions
