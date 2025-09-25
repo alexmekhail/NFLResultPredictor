@@ -1,0 +1,20 @@
+season: 2025
+features:
+  rolling_window_games: 5
+  elo_k: 20
+  include_injuries: false
+  include_weather: false
+model:
+  type: logistic_regression
+  test_size: 0.2
+  random_state: 42
+  class_weight: balanced
+  cv_folds: 5
+output:
+  prob_threshold: 0.5
+paths:
+  raw: data/raw
+  interim: data/interim
+  processed: data/processed
+  artifacts: models/artifacts
+  reports: models/reports
