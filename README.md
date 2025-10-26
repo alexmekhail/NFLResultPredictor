@@ -1,4 +1,5 @@
 # NFLResultPredictor
+![Project Screenshot](NFLResultPredictor.png)
 
 A predictive system for NFL outcomes, updated and improved for the **2025 season**.  
 Uses machine learning to estimate win probabilities and generate picks based on game spreads and historical trends.
