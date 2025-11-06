@@ -1,19 +1,23 @@
+import numpy as np
+import pandas as pd
+import streamlit as st
+import plotly.express as px
 from pathlib import Path
-import re
-import glob
+import re, glob
 
-# Determine base data path (works both locally and on Streamlit Cloud)
+# --- page setup ---
+st.set_page_config(page_title="NFL Result Predictor", layout="wide")
+st.title("🏈 NFL Result Predictor — Weekly Picks")
+
+# --- find and select the week file (place the new block here) ---
 BASE_DIR = Path(__file__).resolve().parents[1]  # -> Season25
 DATA_DIR = BASE_DIR / "data" / "processed"
 
-# Find prediction files
 raw_files = glob.glob(str(DATA_DIR / "predictions_*_wk*.csv"))
-
 if not raw_files:
     st.info("No predictions found. Make sure CSVs are committed under Season25/data/processed/")
     st.stop()
 
-# Parse and sort by week number
 pairs = []
 for f in raw_files:
     m = re.search(r'_wk(\d+)\.csv$', f)
@@ -23,15 +27,12 @@ pairs.sort(key=lambda x: x[0])
 
 weeks = [w for w, _ in pairs]
 labels = [f"Week {w}" for w in weeks]
-default_idx = len(labels) - 1
+default_idx = len(labels) - 1  # latest week
 
 week_choice = st.selectbox("Pick a week:", labels, index=default_idx)
 fn = dict(zip(labels, [p for _, p in pairs]))[week_choice]
 df = pd.read_csv(fn)
-
 st.caption(f"📄 Loaded: {fn}")
-
-
 
 # If predicted_winner is missing, derive it on the fly using a threshold
 threshold = st.sidebar.slider("Pick threshold for a winner (if needed)", 0.40, 0.60, 0.50, 0.01)
