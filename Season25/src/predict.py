@@ -1,4 +1,9 @@
-# src/predict.py
+# Allow running directly: `python src/predict.py ...`
+if __name__ == "__main__" and __package__ is None:
+    import sys, pathlib
+    sys.path.append(str(pathlib.Path(__file__).resolve().parents[1]))
+    __package__ = "src"
+
 import argparse
 import joblib
 import pandas as pd
@@ -14,7 +19,7 @@ def main(season: int, week: int, threshold: float | None = None):
     feats = basic_game_features(raw["schedule"])
 
     # Filter to requested week
-    upcoming = feats[feats["week"] == week].copy()
+    upcoming = feats[feats["week" ] == week].copy()
     if upcoming.empty:
         print(f"No games found for season={season}, week={week}.")
         return

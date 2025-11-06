@@ -1,1 +1,1 @@
-{'accuracy': 0.5625, 'roc_auc': 0.625, 'n_test': 16}
+{'accuracy': 0.56, 'roc_auc': 0.7597402597402597, 'n_test': 25}
