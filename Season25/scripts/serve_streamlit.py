@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import streamlit as st
-import plotly.express as px
 from pathlib import Path
 import re, glob
 
@@ -96,6 +95,8 @@ st.dataframe(
 
 # Bar chart: Predicted winner probability per game
 st.subheader("Predicted Winner Probability (by matchup)")
+
+import plotly.express as px
 
 df_vis = df.assign(
     predicted_win_prob_pct=(df["predicted_win_prob"] * 100).round(1)

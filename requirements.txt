@@ -1,14 +1,7 @@
-pandas==1.5.3
-numpy>=1.26
-scikit-learn>=1.5
-nfl-data-py>=0.3.3
-pyyaml>=6.0.2
-python-dotenv>=1.0.1
-matplotlib>=3.9
-plotly>=5.24
-xgboost>=2.1.1
-lightgbm>=4.5.0
-fastapi>=0.115
-uvicorn[standard]>=0.30
-streamlit>=1.38
-joblib>=1.4.2
+# Streamlit app (reads CSVs only) — fast & Py3.13-friendly
+streamlit==1.51.0
+pandas==2.3.3
+numpy==2.1.3
+plotly==5.24.1
+pyyaml==6.0.2
+joblib==1.4.2
