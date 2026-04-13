@@ -1,77 +1,138 @@
-# NFLResultPredictor
+# NFL Result Predictor
+
 ![Project Screenshot](NFLResultPredictor.png)
 
-A predictive system for NFL outcomes, updated and improved for the **2025 season**.  
-Uses machine learning to estimate win probabilities and generate picks based on game spreads and historical trends.
+A machine learning system for predicting NFL game outcomes, built for the **2025 season**.  
+Live at **[nfl-result-predictor-am11.vercel.app](https://nfl-result-predictor-am11.vercel.app)**
 
 ---
 
-## 🚀 New for 2025 Season
+## What it does
 
-- Added **prediction of outright winners** (not just probabilities) with configurable thresholds.  
-- Streamlit UI enhanced to display matchups, predicted winners, confidence scores, and interactive bar charts.  
-- Improved feature extraction with robust handling of nfl_data_py schema changes.  
-- End-to-end pipeline for fetching schedules, training models, generating weekly predictions, and visualizing results.  
-- Modular design to support richer features in the future (rolling stats, injuries, weather, backtesting, etc.).
+- Fetches the full NFL schedule via `nfl_data_py`
+- Engineers features from betting spreads and home-field advantage
+- Trains a logistic regression model on historical results
+- Generates weekly win probabilities and predicted winners
+- Serves an interactive web dashboard deployed on Vercel
 
 ---
 
-## 🔧 Setup & Usage
+## Web App
+
+The dashboard is deployed at **https://nfl-result-predictor-am11.vercel.app**
+
+Features:
+- Week selector (defaults to latest week)
+- Adjustable pick threshold (0.40–0.60)
+- Sort by confidence, win probability, or home win probability
+- Interactive horizontal bar chart per matchup
+- CSV download of filtered predictions
+
+---
+
+## Project Structure
+
+```
+NFLResultPredictor/
+├── api/                        # Vercel serverless functions
+│   ├── predictions.py          # GET /api/predictions?week=X&threshold=Y
+│   └── weeks.py                # GET /api/weeks
+├── public/
+│   └── index.html              # Web dashboard frontend
+├── Season25/
+│   ├── data/
+│   │   ├── raw/                # schedule_2025.csv
+│   │   └── processed/          # predictions_2025_wkN.csv (weeks 1–18)
+│   ├── models/
+│   │   ├── artifacts/          # baseline_logreg.pkl
+│   │   └── reports/            # baseline_metrics.txt
+│   ├── scripts/
+│   │   ├── refresh_all.py      # Full retrain pipeline
+│   │   ├── get_week.py         # CLI wrapper for predictions
+│   │   └── serve_streamlit.py  # Legacy local Streamlit UI
+│   └── src/
+│       ├── data.py             # Schedule fetching & I/O
+│       ├── features.py         # Feature engineering
+│       ├── train.py            # Model training
+│       └── predict.py          # Prediction generation
+├── requirements.txt
+└── vercel.json
+```
+
+---
+
+## Local Development
 
 ### Prerequisites
-- Python 3.11 (recommended for compatibility with dependencies)  
-- Git  
-- VS Code or another IDE (optional but recommended)
+- Python 3.11+
+- Node.js 18+ (for Vercel CLI)
 
-### Installation
-```
+### Setup
+
+```bash
 git clone https://github.com/alexmekhail/NFLResultPredictor.git
 cd NFLResultPredictor
 
-python3.11 -m venv .venv
-source .venv/bin/activate  # macOS/Linux
-# .\.venv\Scripts\Activate.ps1  # Windows PowerShell
+python3 -m venv .venv
+source .venv/bin/activate      # macOS/Linux
+# .\.venv\Scripts\Activate.ps1  # Windows
 
-pip install --upgrade pip setuptools wheel
 pip install -r requirements.txt
-
-cp .env.example .env
 ```
 
-## 🏋️ Training a Model
+### Retrain the model
 
+```bash
+python Season25/scripts/refresh_all.py
 ```
-python scripts/refresh_all.py
+
+Fetches current season data, trains the model, saves metrics to `models/reports/`.
+
+### Generate predictions for a week
+
+```bash
+python Season25/scripts/get_week.py --season 2025 --week 18
 ```
-This fetches current season data, builds features, trains the baseline model, and saves metrics to models/reports/.
 
-## 🎲 Making Predictions
+Saves results to `Season25/data/processed/`.
+
+### Run the local Streamlit UI (legacy)
+
+```bash
+streamlit run Season25/scripts/serve_streamlit.py
 ```
-python src/predict.py --season 2025 --week 1
+
+---
+
+## Model
+
+| Detail | Value |
+|--------|-------|
+| Algorithm | Logistic Regression |
+| Features | Betting spread (home perspective), home-field indicator |
+| Preprocessing | StandardScaler |
+| Test Accuracy | 56% |
+| ROC-AUC | 76% |
+| Test set size | 25 games |
+
+---
+
+## Deploy
+
+```bash
+npm i -g vercel
+vercel --prod
 ```
-Generates win probabilities and predicted winners for Week 1, saving results to data/processed/.
 
-## 📊 Viewing Results in the UI
-```
-streamlit run scripts/serve_streamlit.py
-```
-Choose a predictions file (e.g. predictions_2025_wk1.csv)
+The `api/` directory contains Python serverless functions; `public/` serves the static frontend.
 
-Browse probabilities, picks, and confidence scores
+---
 
-Visualize results with an interactive bar chart
+## Roadmap
 
-## 📈 Features & Modeling Notes
-- Baseline features: betting spread & home-field indicator
-- Predictions: threshold-based winner assignment (default 0.5, adjustable)
-- Dynamic feature mapping: supports schedule schema changes automatically
-- Streamlit dashboard: tabular results, bar charts, and CSV download
-- Extensible design: add new features, swap models, or expand evaluation
-
-## 🎯 Roadmap
-- Add rolling team statistics (yards/play, turnovers, rest days, EPA/play)
-- Incorporate injury and weather data
-- Introduce advanced models (XGBoost / LightGBM ensembles)
-- Calibrate probability outputs for better accuracy
-- Implement walk-forward backtesting for season-long evaluation
--Automate weekly retraining and predictions with GitHub Actions
+- Rolling team statistics (yards/play, turnovers, rest days, EPA/play)
+- Injury and weather data integration
+- Advanced models (XGBoost / LightGBM ensembles)
+- Probability calibration
+- Walk-forward backtesting for season-long evaluation
+- Automated weekly retraining via GitHub Actions

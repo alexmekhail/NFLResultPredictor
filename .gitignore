@@ -1,0 +1,25 @@
+.vercel
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Env
+.env
+.env.*
+
+# IDE
+.idea/
+
+# macOS
+.DS_Store
+
+# Node
+node_modules/

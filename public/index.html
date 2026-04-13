@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NFL Result Predictor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; }
+    .table-row:hover { background-color: rgba(55, 65, 81, 0.5); }
+  </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+  <div class="max-w-7xl mx-auto px-4 py-8">
+
+    <!-- Header -->
+    <h1 class="text-3xl font-bold mb-2">NFL Result Predictor</h1>
+    <p class="text-gray-400 mb-8">Weekly picks powered by logistic regression on betting spreads</p>
+
+    <!-- Controls -->
+    <div class="bg-gray-800 rounded-xl p-5 mb-6 flex flex-wrap gap-8 items-end">
+
+      <!-- Week selector -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-1">Week</label>
+        <select id="weekSelect"
+          class="bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500 min-w-[120px]">
+          <option>Loading...</option>
+        </select>
+      </div>
+
+      <!-- Threshold slider -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-1">
+          Pick threshold: <span id="thresholdLabel" class="text-green-400 font-mono">0.50</span>
+        </label>
+        <input type="range" id="threshold"
+          min="0.40" max="0.60" step="0.01" value="0.50"
+          class="w-48 accent-green-500 cursor-pointer">
+      </div>
+
+      <!-- Sort options -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Sort by</label>
+        <div class="flex flex-wrap gap-4">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="sort" value="confidence" checked class="accent-green-500">
+            <span class="text-sm">Confidence</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="sort" value="predicted_win_prob" class="accent-green-500">
+            <span class="text-sm">Win Prob</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="sort" value="home_win_prob" class="accent-green-500">
+            <span class="text-sm">Home Win Prob</span>
+          </label>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Predictions table -->
+    <div class="bg-gray-800 rounded-xl p-5 mb-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-semibold">Predictions</h2>
+        <button id="downloadBtn"
+          class="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+          Download CSV
+        </button>
+      </div>
+      <div id="tableContainer" class="overflow-x-auto">
+        <p class="text-gray-400 py-4">Loading predictions...</p>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="bg-gray-800 rounded-xl p-5">
+      <h2 class="text-lg font-semibold mb-4">Predicted Winner Probability by Matchup</h2>
+      <div id="chart"></div>
+    </div>
+
+  </div>
+
+  <script>
+    let currentData = [];
+
+    // ── helpers ──────────────────────────────────────────────────────────────
+
+    function fmtPct(val) {
+      return (val * 100).toFixed(1) + '%';
+    }
+
+    function getSortKey() {
+      return document.querySelector('input[name="sort"]:checked').value;
+    }
+
+    function sortedData() {
+      const key = getSortKey();
+      return [...currentData].sort((a, b) => b[key] - a[key]);
+    }
+
+    // ── data loading ─────────────────────────────────────────────────────────
+
+    async function loadWeeks() {
+      const res = await fetch('/api/weeks');
+      const data = await res.json();
+      const select = document.getElementById('weekSelect');
+      select.innerHTML = '';
+      data.weeks.forEach(w => {
+        const opt = document.createElement('option');
+        opt.value = w;
+        opt.textContent = `Week ${w}`;
+        select.appendChild(opt);
+      });
+      select.selectedIndex = data.weeks.length - 1;
+      await loadPredictions();
+    }
+
+    async function loadPredictions() {
+      const week = document.getElementById('weekSelect').value;
+      const threshold = document.getElementById('threshold').value;
+      const res = await fetch(`/api/predictions?week=${week}&threshold=${threshold}`);
+      const data = await res.json();
+      currentData = data.predictions || [];
+      renderTable();
+      renderChart();
+    }
+
+    // ── rendering ─────────────────────────────────────────────────────────────
+
+    function renderTable() {
+      const rows = sortedData();
+      const container = document.getElementById('tableContainer');
+
+      if (!rows.length) {
+        container.innerHTML = '<p class="text-gray-400 py-4">No predictions available.</p>';
+        return;
+      }
+
+      let html = `
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left border-b border-gray-600 text-gray-400">
+              <th class="pb-3 font-medium pr-6">Matchup</th>
+              <th class="pb-3 font-medium pr-6">Predicted Winner &mdash; Win Probability</th>
+              <th class="pb-3 font-medium">Confidence</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      rows.forEach(row => {
+        html += `
+          <tr class="table-row border-b border-gray-700">
+            <td class="py-3 pr-6 font-medium">${row.matchup}</td>
+            <td class="py-3 pr-6 font-semibold text-green-400">${row.predicted_winner} &mdash; ${fmtPct(row.predicted_win_prob)}</td>
+            <td class="py-3">${fmtPct(row.confidence)}</td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    function renderChart() {
+      const rows = sortedData();
+      if (!rows.length) return;
+
+      const matchups = rows.map(r => r.matchup);
+      const probs    = rows.map(r => parseFloat((r.predicted_win_prob * 100).toFixed(1)));
+      const winners  = rows.map(r => r.predicted_winner);
+
+      const trace = {
+        type: 'bar',
+        orientation: 'h',
+        x: probs,
+        y: matchups,
+        text: winners,
+        textposition: 'outside',
+        cliponaxis: false,
+        marker: { color: '#22c55e' },
+        hovertemplate:
+          '<b>%{y}</b><br>' +
+          'Predicted Winner: %{customdata[0]}<br>' +
+          'Home Win: %{customdata[1]}<br>' +
+          'Predicted Win: %{customdata[2]}<br>' +
+          'Confidence: %{customdata[3]}<extra></extra>',
+        customdata: rows.map(r => [
+          r.predicted_winner,
+          fmtPct(r.home_win_prob),
+          fmtPct(r.predicted_win_prob),
+          fmtPct(r.confidence),
+        ]),
+      };
+
+      const layout = {
+        paper_bgcolor: '#1f2937',
+        plot_bgcolor:  '#1f2937',
+        font:   { color: '#f3f4f6', size: 12 },
+        xaxis:  { title: 'Predicted Winner Probability (%)', gridcolor: '#374151', range: [0, 120] },
+        yaxis:  { automargin: true, gridcolor: '#374151' },
+        bargap: 0.25,
+        margin: { l: 10, r: 10, t: 10, b: 50 },
+        height: Math.max(350, rows.length * 42 + 80),
+      };
+
+      Plotly.react('chart', [trace], layout, { responsive: true, displayModeBar: false });
+    }
+
+    // ── CSV download ──────────────────────────────────────────────────────────
+
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      const rows = sortedData();
+      const lines = ['"Matchup","Predicted Winner — Win Probability %","Confidence %"'];
+      rows.forEach(r => {
+        lines.push(`"${r.matchup}","${r.predicted_winner} — ${fmtPct(r.predicted_win_prob)}","${fmtPct(r.confidence)}"`);
+      });
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+      const a = Object.assign(document.createElement('a'), {
+        href: URL.createObjectURL(blob),
+        download: 'predictions_view.csv',
+      });
+      a.click();
+    });
+
+    // ── event wiring ──────────────────────────────────────────────────────────
+
+    document.getElementById('weekSelect').addEventListener('change', loadPredictions);
+
+    document.getElementById('threshold').addEventListener('input', function () {
+      document.getElementById('thresholdLabel').textContent = parseFloat(this.value).toFixed(2);
+      loadPredictions();
+    });
+
+    document.querySelectorAll('input[name="sort"]').forEach(r => {
+      r.addEventListener('change', () => { renderTable(); renderChart(); });
+    });
+
+    // ── init ─────────────────────────────────────────────────────────────────
+    loadWeeks();
+  </script>
+</body>
+</html>
