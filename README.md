@@ -2,7 +2,7 @@
 
 ![Project Screenshot](NFLResultPredictor.png)
 
-A machine learning system for predicting NFL game outcomes, built for the **2025 season**.  
+A machine learning system for predicting NFL game outcomes, built for the **2026 season**.  
 Live at **[nfl-result-predictor-am11.vercel.app](https://nfl-result-predictor-am11.vercel.app)**
 
 ---
@@ -37,12 +37,14 @@ NFLResultPredictor/
 ├── api/                        # Vercel serverless functions
 │   ├── predictions.py          # GET /api/predictions?week=X&threshold=Y
 │   └── weeks.py                # GET /api/weeks
+│                               # (both auto-detect the highest-numbered SeasonNN/ folder)
 ├── public/
 │   └── index.html              # Web dashboard frontend
-├── Season25/
+├── Season26/                    # Current season (mirror this folder each year)
+│   ├── config.yaml             # season: 2026, train_seasons: [2025]
 │   ├── data/
-│   │   ├── raw/                # schedule_2025.csv
-│   │   └── processed/          # predictions_2025_wkN.csv (weeks 1–18)
+│   │   ├── raw/                # schedule_train_*.csv, schedule_2026.csv
+│   │   └── processed/          # predictions_2026_wkN.csv
 │   ├── models/
 │   │   ├── artifacts/          # baseline_logreg.pkl
 │   │   └── reports/            # baseline_metrics.txt
@@ -50,12 +52,14 @@ NFLResultPredictor/
 │   │   ├── refresh_all.py      # Full retrain pipeline
 │   │   ├── get_week.py         # CLI wrapper for predictions
 │   │   └── serve_streamlit.py  # Legacy local Streamlit UI
-│   └── src/
-│       ├── data.py             # Schedule fetching & I/O
-│       ├── features.py         # Feature engineering
-│       ├── train.py            # Model training
-│       └── predict.py          # Prediction generation
-├── requirements.txt
+│   ├── src/
+│   │   ├── data.py             # Schedule fetching & I/O (cwd-independent paths)
+│   │   ├── features.py         # Feature engineering
+│   │   ├── train.py            # Model training
+│   │   └── predict.py          # Prediction generation
+│   └── requirements.txt        # Model-pipeline deps (pinned)
+├── Season25/                    # Prior season (kept for history)
+├── requirements.txt            # Streamlit dashboard deps
 └── vercel.json
 ```
 
@@ -73,33 +77,40 @@ NFLResultPredictor/
 git clone https://github.com/alexmekhail/NFLResultPredictor.git
 cd NFLResultPredictor
 
-python3 -m venv .venv
-source .venv/bin/activate      # macOS/Linux
-# .\.venv\Scripts\Activate.ps1  # Windows
+python3.11 -m venv Season26/.venv
+source Season26/.venv/bin/activate      # macOS/Linux
+# .\Season26\.venv\Scripts\Activate.ps1  # Windows
 
-pip install -r requirements.txt
+pip install -r Season26/requirements.txt
 ```
+
+Scripts resolve their paths relative to the season folder, so they can be run
+from anywhere (from inside `Season26/` or as `python Season26/scripts/...` from
+the repo root) and always read/write under `Season26/`.
 
 ### Retrain the model
 
 ```bash
-python Season25/scripts/refresh_all.py
+python Season26/scripts/refresh_all.py
 ```
 
-Fetches current season data, trains the model, saves metrics to `models/reports/`.
+Fetches the `train_seasons` schedules (see `Season26/config.yaml`), trains the
+model on completed games, and saves metrics to `Season26/models/reports/`.
 
 ### Generate predictions for a week
 
 ```bash
-python Season25/scripts/get_week.py --season 2025 --week 18
+python Season26/scripts/get_week.py --season 2026 --week 1
 ```
 
-Saves results to `Season25/data/processed/`.
+Saves results to `Season26/data/processed/`. Weeks without a published betting
+spread yet will produce fewer (or no) rows until closer to game time.
 
 ### Run the local Streamlit UI (legacy)
 
 ```bash
-streamlit run Season25/scripts/serve_streamlit.py
+pip install -r requirements.txt
+streamlit run Season26/scripts/serve_streamlit.py
 ```
 
 ---
@@ -111,9 +122,13 @@ streamlit run Season25/scripts/serve_streamlit.py
 | Algorithm | Logistic Regression |
 | Features | Betting spread (home perspective), home-field indicator |
 | Preprocessing | StandardScaler |
-| Test Accuracy | 56% |
-| ROC-AUC | 76% |
-| Test set size | 25 games |
+| Training data | 2025 season, completed games (228 train / 57 test) |
+| Test Accuracy | 67% |
+| ROC-AUC | 72% |
+
+Metrics are for the current `Season26/models/reports/baseline_metrics.txt` and
+will change when the model is retrained (e.g. once 2026 games are added to
+`train_seasons`).
 
 ---
 
