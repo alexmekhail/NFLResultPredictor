@@ -1,0 +1,10 @@
+Model:     /Users/alexmekhail/NFLResultPredictor/Season26/models/artifacts/baseline_logreg.pkl
+Threshold: 0.5
+Accuracy = correct winner picks / completed games
+
+ season  games accuracy roc_auc  correct always_pick_home pick_favorite
+   2023    285    0.674   0.693      192            0.565         0.674
+   2024    285    0.705   0.756      201            0.547         0.705
+   2025    285    0.660   0.722      188            0.533         0.660
+
+POOLED 2023-2025: 581/855 = 0.680 winner accuracy
