@@ -3,7 +3,7 @@
 ![Project Screenshot](NFLResultPredictor.png)
 
 A machine learning system for predicting NFL game outcomes, built for the **2026 season**.  
-Live at **[nfl-result-predictor-am11.vercel.app](https://nfl-result-predictor-am11.vercel.app)**
+Live at **[nfl-result-predictor.vercel.app](https://nfl-result-predictor.vercel.app)**
 
 ---
 
@@ -19,7 +19,7 @@ Live at **[nfl-result-predictor-am11.vercel.app](https://nfl-result-predictor-am
 
 ## Web App
 
-The dashboard is deployed at **https://nfl-result-predictor-am11.vercel.app**
+The dashboard is deployed at **https://nfl-result-predictor.vercel.app**
 
 Features:
 - Week selector (defaults to latest week)
