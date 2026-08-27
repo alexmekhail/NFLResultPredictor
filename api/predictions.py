@@ -8,7 +8,22 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-DATA_DIR = Path(__file__).resolve().parents[1] / "Season25" / "data" / "processed"
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+def latest_season_dir() -> Path:
+    """Highest-numbered SeasonNN/ folder in the repo, so a new season only
+    requires adding a SeasonNN/ folder — this file never needs editing."""
+    seasons = []
+    for p in REPO_ROOT.glob("Season*"):
+        if p.is_dir() and re.fullmatch(r"Season\d+", p.name):
+            seasons.append(p)
+    if not seasons:
+        raise RuntimeError(f"No SeasonNN/ folder found under {REPO_ROOT}")
+    return max(seasons, key=lambda p: int(p.name.replace("Season", "")))
+
+
+DATA_DIR = latest_season_dir() / "data" / "processed"
 
 
 def get_week_files():

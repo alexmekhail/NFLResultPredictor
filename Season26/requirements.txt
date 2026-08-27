@@ -1,0 +1,10 @@
+# Season26 model pipeline (src/ + scripts/). Pinned to match the versions the
+# Season25 pipeline was last known to work with.
+# nfl_data_py 0.3.x requires numpy<2 and pandas<2.
+nfl_data_py==0.3.3
+pandas==1.5.3
+numpy==1.26.4
+scikit-learn==1.7.2
+joblib==1.5.2
+pyyaml==6.0.3
+python-dotenv==1.1.1

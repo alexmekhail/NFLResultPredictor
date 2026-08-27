@@ -1,0 +1,8 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      { "name": "Train Model", "type": "python", "request": "launch", "program": "src/train.py" },
+      { "name": "Predict Next Week", "type": "python", "request": "launch", "program": "src/predict.py", "args": ["--season","2026","--week","1"] },
+      { "name": "Streamlit App", "type": "python", "request": "launch", "module": "streamlit", "args": ["run","scripts/serve_streamlit.py"] }
+    ]
+  }
