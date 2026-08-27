@@ -1,0 +1,1 @@
+{'train_seasons': [2025], 'predict_season': 2026, 'n_train': 228, 'accuracy': 0.6666666666666666, 'roc_auc': 0.7166666666666667, 'n_test': 57}
