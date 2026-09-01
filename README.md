@@ -22,11 +22,15 @@ Live at **[nfl-result-predictor.vercel.app](https://nfl-result-predictor.vercel.
 The dashboard is deployed at **https://nfl-result-predictor.vercel.app**
 
 Features:
-- Week selector (defaults to latest week)
-- Adjustable pick threshold (0.40–0.60)
-- Sort by confidence, win probability, or home win probability
-- Interactive horizontal bar chart per matchup
-- CSV download of filtered predictions
+- Lands on the **current week** (first week with an unplayed game)
+- Matchup cards with team logos, full names, predicted winner, win-probability bar
+- **Last week's results**: final scores with each pick graded ✓ / ✗
+- Season-to-date and per-week record (correct picks / graded games)
+- Options panel: adjustable pick threshold (0.40–0.60), sort, CSV download
+
+Results are joined from the schedule by `game_id`, so once a week's games are
+played and its schedule is refreshed (any `get_week.py` run does this) the picks
+are graded automatically — the committed prediction files never change.
 
 ---
 
@@ -34,12 +38,14 @@ Features:
 
 ```
 NFLResultPredictor/
-├── api/                        # Vercel serverless functions
-│   ├── predictions.py          # GET /api/predictions?week=X&threshold=Y
-│   └── weeks.py                # GET /api/weeks
-│                               # (both auto-detect the highest-numbered SeasonNN/ folder)
+├── api/                        # Vercel serverless functions (auto-detect highest SeasonNN/)
+│   ├── _nfl.py                  # shared: load CSVs, join results, grade picks
+│   ├── predictions.py          # GET /api/predictions?week=X&threshold=Y -> games + grading
+│   └── weeks.py                # GET /api/weeks -> weeks, current/previous week, records
 ├── public/
-│   └── index.html              # Web dashboard frontend
+│   ├── index.html              # Web dashboard frontend
+│   ├── teams.json              # team names / colors / divisions
+│   └── logos/                  # 32 team logo PNGs (built, committed)
 ├── Season26/                    # Current season (mirror this folder each year)
 │   ├── config.yaml             # season: 2026, train_seasons: [2025]
 │   ├── data/
@@ -52,6 +58,7 @@ NFLResultPredictor/
 │   │   ├── refresh_all.py      # Full retrain pipeline
 │   │   ├── get_week.py         # CLI wrapper for predictions
 │   │   ├── backtest.py         # Score the model vs completed seasons
+│   │   ├── build_team_assets.py # Download team logos + write public/teams.json
 │   │   └── serve_streamlit.py  # Legacy local Streamlit UI
 │   ├── src/
 │   │   ├── data.py             # Schedule fetching & I/O (cwd-independent paths)
@@ -60,6 +67,7 @@ NFLResultPredictor/
 │   │   └── predict.py          # Prediction generation
 │   └── requirements.txt        # Model-pipeline deps (pinned)
 ├── Season25/                    # Prior season (kept for history)
+├── devserver.py                # Local preview (emulates vercel.json routing)
 ├── requirements.txt            # Streamlit dashboard deps
 └── vercel.json
 ```
@@ -116,6 +124,25 @@ python Season26/scripts/backtest.py --seasons 2022 2023 2024
 
 Writes `Season26/models/reports/backtest.txt`. See
 [How accuracy is calculated](#how-accuracy-is-calculated) below.
+
+### Rebuild team logos / metadata (once per season)
+
+```bash
+python Season26/scripts/build_team_assets.py
+```
+
+Downloads a logo per team into `public/logos/` and writes `public/teams.json`.
+Team branding rarely changes, so this only needs re-running on a rebrand or
+relocation.
+
+### Preview the web dashboard locally
+
+```bash
+python devserver.py            # http://localhost:8000
+```
+
+Emulates the `vercel.json` routing (`/api/*` → the Python handlers, everything
+else → `public/`) so you can test the dashboard without the Vercel CLI.
 
 ### Run the local Streamlit UI (legacy)
 

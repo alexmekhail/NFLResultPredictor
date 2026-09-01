@@ -1,42 +1,38 @@
+import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from http.server import BaseHTTPRequestHandler
+from urllib.parse import urlparse, parse_qs
 import json
-import glob
-import re
-from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-
-
-def latest_season_dir() -> Path:
-    """Highest-numbered SeasonNN/ folder in the repo, so a new season only
-    requires adding a SeasonNN/ folder — this file never needs editing."""
-    seasons = []
-    for p in REPO_ROOT.glob("Season*"):
-        if p.is_dir() and re.fullmatch(r"Season\d+", p.name):
-            seasons.append(p)
-    if not seasons:
-        raise RuntimeError(f"No SeasonNN/ folder found under {REPO_ROOT}")
-    return max(seasons, key=lambda p: int(p.name.replace("Season", "")))
-
-
-DATA_DIR = latest_season_dir() / "data" / "processed"
+from _nfl import season_summary
 
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
-        raw_files = glob.glob(str(DATA_DIR / "predictions_*_wk*.csv"))
-        weeks = []
-        for f in raw_files:
-            m = re.search(r"_wk(\d+)\.csv$", f)
-            if m:
-                weeks.append(int(m.group(1)))
-        weeks.sort()
+        params = parse_qs(urlparse(self.path).query)
+        try:
+            threshold = float(params.get("threshold", [0.5])[0])
+        except ValueError:
+            threshold = 0.5
 
-        self.send_response(200)
+        try:
+            payload = season_summary(threshold)
+        except Exception as exc:
+            self._send(500, {"error": "summary failed", "detail": repr(exc)})
+            return
+
+        self._send(200, payload)
+
+    def _send(self, code, payload):
+        body = json.dumps(payload).encode()
+        self.send_response(code)
         self.send_header("Content-type", "application/json")
         self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Cache-Control", "public, max-age=60, stale-while-revalidate=300")
         self.end_headers()
-        self.wfile.write(json.dumps({"weeks": weeks}).encode())
+        self.wfile.write(body)
 
     def log_message(self, format, *args):
         pass

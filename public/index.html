@@ -1,246 +1,416 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NFL Result Predictor</title>
+  <meta name="description" content="Weekly NFL win probabilities and predicted winners from a logistic-regression model on betting spreads.">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' };
+  </script>
   <style>
-    body { font-family: system-ui, -apple-system, sans-serif; }
-    .table-row:hover { background-color: rgba(55, 65, 81, 0.5); }
+    :root { color-scheme: dark; }
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background:
+        radial-gradient(900px 500px at 15% -10%, rgba(34,197,94,0.10), transparent 60%),
+        radial-gradient(900px 500px at 100% 0%, rgba(56,189,248,0.08), transparent 55%),
+        #09090b;
+      -webkit-font-smoothing: antialiased;
+    }
+    .card-enter { animation: rise .35s cubic-bezier(.2,.7,.2,1) both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .week-pills::-webkit-scrollbar { height: 0; }
+    .prob-fill { transition: width .5s cubic-bezier(.2,.7,.2,1); }
+    .logo-img { object-fit: contain; }
   </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen">
-  <div class="max-w-7xl mx-auto px-4 py-8">
+<body class="text-zinc-100 min-h-screen">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
 
     <!-- Header -->
-    <h1 class="text-3xl font-bold mb-2">NFL Result Predictor</h1>
-    <p class="text-gray-400 mb-8">Weekly picks powered by logistic regression on betting spreads</p>
-
-    <!-- Controls -->
-    <div class="bg-gray-800 rounded-xl p-5 mb-6 flex flex-wrap gap-8 items-end">
-
-      <!-- Week selector -->
+    <header class="flex flex-wrap items-start justify-between gap-4 mb-6">
       <div>
-        <label class="block text-sm font-medium text-gray-300 mb-1">Week</label>
-        <select id="weekSelect"
-          class="bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500 min-w-[120px]">
-          <option>Loading...</option>
-        </select>
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
+          <span class="text-green-400">●</span> NFL Result Predictor
+        </h1>
+        <p class="text-zinc-400 text-sm mt-1">
+          Predicted winners &amp; win probabilities · logistic regression on betting spreads
+        </p>
       </div>
-
-      <!-- Threshold slider -->
-      <div>
-        <label class="block text-sm font-medium text-gray-300 mb-1">
-          Pick threshold: <span id="thresholdLabel" class="text-green-400 font-mono">0.50</span>
-        </label>
-        <input type="range" id="threshold"
-          min="0.40" max="0.60" step="0.01" value="0.50"
-          class="w-48 accent-green-500 cursor-pointer">
+      <div id="seasonRecord" class="shrink-0 rounded-xl border border-zinc-800 bg-zinc-900/70 px-4 py-2 text-sm">
+        <span class="text-zinc-500">Season</span>
+        <span class="text-zinc-300 ml-1">—</span>
       </div>
+    </header>
 
-      <!-- Sort options -->
-      <div>
-        <label class="block text-sm font-medium text-gray-300 mb-2">Sort by</label>
-        <div class="flex flex-wrap gap-4">
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="sort" value="confidence" checked class="accent-green-500">
-            <span class="text-sm">Confidence</span>
-          </label>
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="sort" value="predicted_win_prob" class="accent-green-500">
-            <span class="text-sm">Win Prob</span>
-          </label>
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="sort" value="home_win_prob" class="accent-green-500">
-            <span class="text-sm">Home Win Prob</span>
-          </label>
-        </div>
-      </div>
+    <!-- Last week recap (only shows once there are graded results) -->
+    <button id="lastWeekRecap" type="button"
+      class="hidden w-full text-left mb-4 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:bg-zinc-900 transition-colors px-4 py-3">
+    </button>
 
+    <!-- Week pills -->
+    <div class="week-pills -mx-1 mb-5 flex gap-2 overflow-x-auto pb-1 px-1" id="weekPills"></div>
+
+    <!-- Selected-week summary -->
+    <div class="flex flex-wrap items-baseline justify-between gap-2 mb-4">
+      <h2 id="weekTitle" class="text-lg font-semibold">Week —</h2>
+      <p id="weekSub" class="text-sm text-zinc-400"></p>
     </div>
 
-    <!-- Predictions table -->
-    <div class="bg-gray-800 rounded-xl p-5 mb-6">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-semibold">Predictions</h2>
+    <!-- Options -->
+    <details class="group mb-5 rounded-xl border border-zinc-800 bg-zinc-900/50">
+      <summary class="cursor-pointer select-none px-4 py-2.5 text-sm text-zinc-300 flex items-center gap-2">
+        <svg class="w-4 h-4 text-zinc-500 group-open:rotate-90 transition-transform" viewBox="0 0 20 20" fill="currentColor"><path d="M7 5l6 5-6 5V5z"/></svg>
+        Options
+      </summary>
+      <div class="px-4 pb-4 pt-1 flex flex-wrap gap-x-8 gap-y-4 items-end">
+        <div>
+          <label class="block text-xs font-medium text-zinc-400 mb-1.5">
+            Pick threshold · <span id="thresholdLabel" class="text-green-400 font-mono">0.50</span>
+          </label>
+          <input type="range" id="threshold" min="0.40" max="0.60" step="0.01" value="0.50"
+            class="w-44 accent-green-500 cursor-pointer">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-zinc-400 mb-1.5">Sort by</label>
+          <select id="sortSelect" class="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+            <option value="confidence">Confidence</option>
+            <option value="predicted_win_prob">Win probability</option>
+            <option value="kickoff">Kickoff time</option>
+          </select>
+        </div>
         <button id="downloadBtn"
-          class="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+          class="rounded-lg border border-zinc-700 hover:border-zinc-500 bg-zinc-800 hover:bg-zinc-700 text-sm px-3 py-1.5 transition-colors">
           Download CSV
         </button>
       </div>
-      <div id="tableContainer" class="overflow-x-auto">
-        <p class="text-gray-400 py-4">Loading predictions...</p>
-      </div>
+    </details>
+
+    <!-- Games grid -->
+    <div id="grid" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <p class="text-zinc-500 py-8 col-span-full">Loading…</p>
     </div>
 
-    <!-- Chart -->
-    <div class="bg-gray-800 rounded-xl p-5">
-      <h2 class="text-lg font-semibold mb-4">Predicted Winner Probability by Matchup</h2>
-      <div id="chart"></div>
-    </div>
-
+    <footer class="mt-12 text-center text-xs text-zinc-600">
+      Model &amp; data via <span class="text-zinc-500">nfl_data_py</span>. Predictions are generated before kickoff and not updated after.
+    </footer>
   </div>
 
   <script>
-    let currentData = [];
+    const state = {
+      teams: {},
+      summary: null,
+      week: null,
+      games: [],
+      threshold: 0.50,
+      sort: 'confidence',
+    };
 
-    // ── helpers ──────────────────────────────────────────────────────────────
+    const pct = v => (v == null ? '—' : (v * 100).toFixed(0) + '%');
+    const pct1 = v => (v == null ? '—' : (v * 100).toFixed(1) + '%');
 
-    function fmtPct(val) {
-      return (val * 100).toFixed(1) + '%';
+    function teamName(abbr) {
+      const t = state.teams[abbr];
+      return t ? t.name : abbr;
+    }
+    function teamColor(abbr) {
+      const t = state.teams[abbr];
+      return t && t.color ? t.color : '#3f3f46';
+    }
+    function logo(abbr) {
+      return `/logos/${abbr}.png`;
+    }
+    function fmtKick(iso, weekday) {
+      if (!iso) return weekday || '';
+      const d = new Date(iso);
+      if (isNaN(d)) return weekday || iso;
+      return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
+        + ' · ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
     }
 
-    function getSortKey() {
-      return document.querySelector('input[name="sort"]:checked').value;
+    // ── data ──────────────────────────────────────────────────────────────────
+
+    async function init() {
+      try {
+        state.teams = await (await fetch('/teams.json')).json();
+      } catch { state.teams = {}; }
+
+      try {
+        await loadSummary();
+      } catch {
+        document.getElementById('grid').innerHTML =
+          '<div class="col-span-full rounded-xl border border-zinc-800 bg-zinc-900/50 p-8 text-center text-zinc-400">Couldn’t load predictions. Try refreshing.</div>';
+        return;
+      }
+      state.week = state.summary.current_week ?? (state.summary.weeks.slice(-1)[0] ?? 1);
+      renderSeasonRecord();
+      renderLastWeekRecap();
+      renderPills();
+      await loadWeek(state.week);
     }
 
-    function sortedData() {
-      const key = getSortKey();
-      return [...currentData].sort((a, b) => b[key] - a[key]);
+    async function loadSummary() {
+      const res = await fetch(`/api/weeks?threshold=${state.threshold}`);
+      state.summary = await res.json();
     }
 
-    // ── data loading ─────────────────────────────────────────────────────────
-
-    async function loadWeeks() {
-      const res = await fetch('/api/weeks');
+    async function loadWeek(week) {
+      state.week = week;
+      renderPills();
+      document.getElementById('grid').innerHTML =
+        '<p class="text-zinc-500 py-8 col-span-full">Loading…</p>';
+      const res = await fetch(`/api/predictions?week=${week}&threshold=${state.threshold}`);
       const data = await res.json();
-      const select = document.getElementById('weekSelect');
-      select.innerHTML = '';
-      data.weeks.forEach(w => {
-        const opt = document.createElement('option');
-        opt.value = w;
-        opt.textContent = `Week ${w}`;
-        select.appendChild(opt);
-      });
-      select.selectedIndex = data.weeks.length - 1;
-      await loadPredictions();
-    }
-
-    async function loadPredictions() {
-      const week = document.getElementById('weekSelect').value;
-      const threshold = document.getElementById('threshold').value;
-      const res = await fetch(`/api/predictions?week=${week}&threshold=${threshold}`);
-      const data = await res.json();
-      currentData = data.predictions || [];
-      renderTable();
-      renderChart();
+      state.games = data.predictions || [];
+      state.weekRecord = data.record || null;
+      renderWeekHeader();
+      renderGrid();
     }
 
     // ── rendering ─────────────────────────────────────────────────────────────
 
-    function renderTable() {
-      const rows = sortedData();
-      const container = document.getElementById('tableContainer');
+    function renderSeasonRecord() {
+      const o = state.summary?.records?.overall;
+      const el = document.getElementById('seasonRecord');
+      const yr = state.summary?.season ?? '';
+      if (o && o.graded > 0) {
+        el.innerHTML = `<span class="text-zinc-500">${yr} season</span>
+          <span class="ml-2 font-semibold text-zinc-100">${o.correct}/${o.graded}</span>
+          <span class="ml-1 text-green-400 font-medium">${pct1(o.accuracy)}</span>`;
+      } else {
+        el.innerHTML = `<span class="text-zinc-500">${yr} season</span>
+          <span class="ml-2 text-zinc-400">no results yet</span>`;
+      }
+    }
 
-      if (!rows.length) {
-        container.innerHTML = '<p class="text-gray-400 py-4">No predictions available.</p>';
+    function renderLastWeekRecap() {
+      const s = state.summary;
+      const btn = document.getElementById('lastWeekRecap');
+      if (!s || s.previous_week == null) { btn.classList.add('hidden'); return; }
+      const rec = s.records.by_week[String(s.previous_week)];
+      if (!rec || (rec.graded ?? 0) === 0) { btn.classList.add('hidden'); return; }
+      btn.classList.remove('hidden');
+      btn.innerHTML = `
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <div class="text-xs uppercase tracking-wide text-zinc-500">Last week</div>
+            <div class="text-sm mt-0.5">
+              <span class="font-semibold">Week ${s.previous_week}</span>
+              <span class="text-zinc-400">— ${rec.correct}/${rec.graded} picks correct</span>
+              <span class="text-green-400 font-medium ml-1">${pct1(rec.accuracy)}</span>
+            </div>
+          </div>
+          <span class="text-xs text-zinc-500 shrink-0">View results →</span>
+        </div>`;
+      btn.onclick = () => loadWeek(s.previous_week);
+    }
+
+    function renderPills() {
+      const s = state.summary;
+      const wrap = document.getElementById('weekPills');
+      wrap.innerHTML = '';
+      (s?.weeks || []).forEach(w => {
+        const rec = s.records.by_week[String(w)];
+        const isCurrent = w === s.current_week;
+        const active = w === state.week;
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = [
+          'shrink-0 rounded-lg px-3 py-1.5 text-sm border transition-colors',
+          active ? 'bg-green-500 border-green-500 text-zinc-950 font-semibold'
+                 : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-zinc-600',
+        ].join(' ');
+        let label = `Week ${w}`;
+        if (rec && (rec.graded ?? 0) > 0 && rec.final === rec.games) {
+          label += ` · ${rec.correct}/${rec.graded}`;
+        } else if (isCurrent) {
+          label += ' · now';
+        }
+        b.textContent = label;
+        b.onclick = () => loadWeek(w);
+        wrap.appendChild(b);
+      });
+    }
+
+    function renderWeekHeader() {
+      const rec = state.weekRecord;
+      const games = state.games;
+      document.getElementById('weekTitle').textContent = `Week ${state.week}`;
+      const sub = document.getElementById('weekSub');
+      const finals = games.filter(g => g.status === 'final').length;
+      if (finals && rec) {
+        sub.innerHTML = finals === games.length
+          ? `Final — <span class="text-zinc-200 font-medium">${rec.correct}/${rec.graded}</span> picks correct (${pct1(rec.accuracy)})`
+          : `${finals}/${games.length} games final — <span class="text-zinc-200 font-medium">${rec.correct}/${rec.graded}</span> correct so far`;
+      } else if (games.length) {
+        const k = games.map(g => g.kickoff).filter(Boolean).sort()[0];
+        sub.textContent = k ? `Kicks off ${fmtKick(k)}` : `${games.length} games`;
+      } else {
+        sub.textContent = '';
+      }
+    }
+
+    function sortedGames() {
+      const g = [...state.games];
+      if (state.sort === 'kickoff') {
+        g.sort((a, b) => (a.kickoff || '').localeCompare(b.kickoff || ''));
+      } else {
+        g.sort((a, b) => (b[state.sort] ?? 0) - (a[state.sort] ?? 0));
+      }
+      return g;
+    }
+
+    function teamRow(abbr, opts) {
+      const { score, isWinnerPick, isActualWinner, showScore, dim } = opts;
+      const color = teamColor(abbr);
+      return `
+        <div class="flex items-center gap-2.5 ${dim ? 'opacity-45' : ''}">
+          <img src="${logo(abbr)}" alt="" width="28" height="28" class="logo-img w-7 h-7 shrink-0" loading="lazy"
+               onerror="this.style.visibility='hidden'">
+          <span class="flex-1 min-w-0 truncate ${isActualWinner ? 'font-bold' : (isWinnerPick ? 'font-semibold' : 'font-medium')} text-[0.95rem]">
+            ${teamName(abbr)}
+          </span>
+          ${isWinnerPick ? `<span class="shrink-0 text-[10px] uppercase tracking-wide font-bold px-1.5 py-0.5 rounded"
+              style="background:${color}22;color:${lighten(color)}">Pick</span>` : ''}
+          ${showScore ? `<span class="shrink-0 tabular-nums text-base ${isActualWinner ? 'font-bold text-zinc-100' : 'text-zinc-400'}">${score ?? ''}</span>` : ''}
+        </div>`;
+    }
+
+    // crude lighten so team colors stay readable on dark
+    function lighten(hex) {
+      try {
+        const n = parseInt(hex.slice(1), 16);
+        let r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+        r = Math.round(r + (255 - r) * 0.45);
+        g = Math.round(g + (255 - g) * 0.45);
+        b = Math.round(b + (255 - b) * 0.45);
+        return `rgb(${r},${g},${b})`;
+      } catch { return '#d4d4d8'; }
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('grid');
+      const games = sortedGames();
+      if (!games.length) {
+        grid.innerHTML = `<div class="col-span-full rounded-xl border border-zinc-800 bg-zinc-900/50 p-8 text-center text-zinc-400">
+          No predictions for this week yet — betting spreads aren't published this far out.
+        </div>`;
         return;
       }
 
-      let html = `
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="text-left border-b border-gray-600 text-gray-400">
-              <th class="pb-3 font-medium pr-6">Matchup</th>
-              <th class="pb-3 font-medium pr-6">Predicted Winner &mdash; Win Probability</th>
-              <th class="pb-3 font-medium">Confidence</th>
-            </tr>
-          </thead>
-          <tbody>
-      `;
+      grid.innerHTML = games.map((g, i) => {
+        const isFinal = g.status === 'final';
+        const pickColor = teamColor(g.predicted_winner);
+        const probForPick = g.predicted_win_prob;
 
-      rows.forEach(row => {
-        html += `
-          <tr class="table-row border-b border-gray-700">
-            <td class="py-3 pr-6 font-medium">${row.matchup}</td>
-            <td class="py-3 pr-6 font-semibold text-green-400">${row.predicted_winner} &mdash; ${fmtPct(row.predicted_win_prob)}</td>
-            <td class="py-3">${fmtPct(row.confidence)}</td>
-          </tr>
-        `;
-      });
+        // result badge
+        let badge = '';
+        if (isFinal && g.correct === true) {
+          badge = `<span class="text-[11px] font-bold text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">✓ Correct</span>`;
+        } else if (isFinal && g.correct === false) {
+          badge = `<span class="text-[11px] font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full">✗ Missed</span>`;
+        } else if (isFinal) {
+          badge = `<span class="text-[11px] text-zinc-500">Final · tie</span>`;
+        } else {
+          badge = `<span class="text-[11px] text-zinc-500">${fmtKick(g.kickoff, g.weekday)}</span>`;
+        }
 
-      html += '</tbody></table>';
-      container.innerHTML = html;
+        const awayWinner = isFinal && g.actual_winner === g.away_team;
+        const homeWinner = isFinal && g.actual_winner === g.home_team;
+
+        return `
+        <div class="card-enter rounded-xl border border-zinc-800 hover:border-zinc-700 bg-zinc-900/70 overflow-hidden transition-colors"
+             style="animation-delay:${Math.min(i * 25, 300)}ms">
+          <div class="h-1" style="background:${pickColor}"></div>
+          <div class="p-4">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[11px] uppercase tracking-wide text-zinc-500">${isFinal ? 'Result' : 'Matchup'}</span>
+              ${badge}
+            </div>
+
+            <div class="space-y-2">
+              ${teamRow(g.away_team, {
+                score: g.away_score, showScore: isFinal,
+                isWinnerPick: !isFinal && g.predicted_winner === g.away_team,
+                isActualWinner: awayWinner,
+                dim: isFinal && g.actual_winner && !awayWinner,
+              })}
+              ${teamRow(g.home_team, {
+                score: g.home_score, showScore: isFinal,
+                isWinnerPick: !isFinal && g.predicted_winner === g.home_team,
+                isActualWinner: homeWinner,
+                dim: isFinal && g.actual_winner && !homeWinner,
+              })}
+            </div>
+
+            <div class="mt-3.5">
+              <div class="flex items-center justify-between text-xs mb-1">
+                <span class="text-zinc-400">
+                  ${isFinal ? 'Model had' : 'Model picks'}
+                  <span class="font-semibold" style="color:${lighten(pickColor)}">${g.predicted_winner}</span>
+                </span>
+                <span class="tabular-nums text-zinc-300 font-medium">${pct(probForPick)}</span>
+              </div>
+              <div class="h-1.5 rounded-full bg-zinc-800 overflow-hidden">
+                <div class="prob-fill h-full rounded-full" style="width:${(probForPick * 100).toFixed(1)}%;background:${pickColor}"></div>
+              </div>
+              <div class="mt-2 text-[11px] text-zinc-500 flex gap-3">
+                <span>Confidence ${pct(g.confidence)}</span>
+                ${g.spread_home != null ? `<span>Spread ${spreadText(g)}</span>` : ''}
+              </div>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
     }
 
-    function renderChart() {
-      const rows = sortedData();
-      if (!rows.length) return;
-
-      const matchups = rows.map(r => r.matchup);
-      const probs    = rows.map(r => parseFloat((r.predicted_win_prob * 100).toFixed(1)));
-      const winners  = rows.map(r => r.predicted_winner);
-
-      const trace = {
-        type: 'bar',
-        orientation: 'h',
-        x: probs,
-        y: matchups,
-        text: winners,
-        textposition: 'outside',
-        cliponaxis: false,
-        marker: { color: '#22c55e' },
-        hovertemplate:
-          '<b>%{y}</b><br>' +
-          'Predicted Winner: %{customdata[0]}<br>' +
-          'Home Win: %{customdata[1]}<br>' +
-          'Predicted Win: %{customdata[2]}<br>' +
-          'Confidence: %{customdata[3]}<extra></extra>',
-        customdata: rows.map(r => [
-          r.predicted_winner,
-          fmtPct(r.home_win_prob),
-          fmtPct(r.predicted_win_prob),
-          fmtPct(r.confidence),
-        ]),
-      };
-
-      const layout = {
-        paper_bgcolor: '#1f2937',
-        plot_bgcolor:  '#1f2937',
-        font:   { color: '#f3f4f6', size: 12 },
-        xaxis:  { title: 'Predicted Winner Probability (%)', gridcolor: '#374151', range: [0, 120] },
-        yaxis:  { automargin: true, gridcolor: '#374151' },
-        bargap: 0.25,
-        margin: { l: 10, r: 10, t: 10, b: 50 },
-        height: Math.max(350, rows.length * 42 + 80),
-      };
-
-      Plotly.react('chart', [trace], layout, { responsive: true, displayModeBar: false });
+    function spreadText(g) {
+      // spread_home is the line from the home team's perspective (negative = home favored)
+      const s = g.spread_home;
+      if (s === 0) return 'PK';
+      const fav = s < 0 ? g.home_team : g.away_team;
+      return `${fav} ${(-Math.abs(s)).toFixed(1)}`;
     }
 
-    // ── CSV download ──────────────────────────────────────────────────────────
+    // ── CSV ───────────────────────────────────────────────────────────────────
 
-    document.getElementById('downloadBtn').addEventListener('click', () => {
-      const rows = sortedData();
-      const lines = ['"Matchup","Predicted Winner — Win Probability %","Confidence %"'];
-      rows.forEach(r => {
-        lines.push(`"${r.matchup}","${r.predicted_winner} — ${fmtPct(r.predicted_win_prob)}","${fmtPct(r.confidence)}"`);
-      });
+    function downloadCsv() {
+      const games = sortedGames();
+      const head = ['week','away_team','home_team','predicted_winner','predicted_win_prob','confidence','status','away_score','home_score','actual_winner','correct'];
+      const lines = [head.join(',')];
+      games.forEach(g => lines.push(head.map(k => {
+        const v = g[k];
+        return v == null ? '' : String(v).includes(',') ? `"${v}"` : v;
+      }).join(',')));
       const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
       const a = Object.assign(document.createElement('a'), {
         href: URL.createObjectURL(blob),
-        download: 'predictions_view.csv',
+        download: `predictions_week${state.week}.csv`,
       });
       a.click();
-    });
+      URL.revokeObjectURL(a.href);
+    }
 
-    // ── event wiring ──────────────────────────────────────────────────────────
-
-    document.getElementById('weekSelect').addEventListener('change', loadPredictions);
+    // ── events ────────────────────────────────────────────────────────────────
 
     document.getElementById('threshold').addEventListener('input', function () {
-      document.getElementById('thresholdLabel').textContent = parseFloat(this.value).toFixed(2);
-      loadPredictions();
+      state.threshold = parseFloat(this.value);
+      document.getElementById('thresholdLabel').textContent = state.threshold.toFixed(2);
     });
-
-    document.querySelectorAll('input[name="sort"]').forEach(r => {
-      r.addEventListener('change', () => { renderTable(); renderChart(); });
+    document.getElementById('threshold').addEventListener('change', async () => {
+      await loadSummary();
+      renderSeasonRecord(); renderLastWeekRecap();
+      await loadWeek(state.week);
     });
+    document.getElementById('sortSelect').addEventListener('change', function () {
+      state.sort = this.value;
+      renderGrid();
+    });
+    document.getElementById('downloadBtn').addEventListener('click', downloadCsv);
 
-    // ── init ─────────────────────────────────────────────────────────────────
-    loadWeeks();
+    init();
   </script>
 </body>
 </html>
