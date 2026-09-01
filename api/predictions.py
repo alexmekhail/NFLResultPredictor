@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import json
@@ -17,11 +21,15 @@ class handler(BaseHTTPRequestHandler):
         except ValueError:
             threshold = 0.5
 
-        if week not in week_files():
-            self._send(404, {"error": "Week not found"})
+        try:
+            if week not in week_files():
+                self._send(404, {"error": "Week not found"})
+                return
+            result = grade_week(week, threshold)
+        except Exception as exc:
+            self._send(500, {"error": "prediction load failed", "detail": repr(exc)})
             return
 
-        result = grade_week(week, threshold)
         # keep the historical key name for the games list
         self._send(200, {
             "week": result["week"],

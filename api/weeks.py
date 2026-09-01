@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import json
@@ -13,10 +17,17 @@ class handler(BaseHTTPRequestHandler):
         except ValueError:
             threshold = 0.5
 
-        payload = season_summary(threshold)
+        try:
+            payload = season_summary(threshold)
+        except Exception as exc:
+            self._send(500, {"error": "summary failed", "detail": repr(exc)})
+            return
 
+        self._send(200, payload)
+
+    def _send(self, code, payload):
         body = json.dumps(payload).encode()
-        self.send_response(200)
+        self.send_response(code)
         self.send_header("Content-type", "application/json")
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Cache-Control", "public, max-age=60, stale-while-revalidate=300")
