@@ -67,6 +67,7 @@ NFLResultPredictor/
 │   │   └── predict.py          # Prediction generation
 │   └── requirements.txt        # Model-pipeline deps (pinned)
 ├── Season25/                    # Prior season (kept for history)
+├── devserver.py                # Local preview (emulates vercel.json routing)
 ├── requirements.txt            # Streamlit dashboard deps
 └── vercel.json
 ```
@@ -133,6 +134,15 @@ python Season26/scripts/build_team_assets.py
 Downloads a logo per team into `public/logos/` and writes `public/teams.json`.
 Team branding rarely changes, so this only needs re-running on a rebrand or
 relocation.
+
+### Preview the web dashboard locally
+
+```bash
+python devserver.py            # http://localhost:8000
+```
+
+Emulates the `vercel.json` routing (`/api/*` → the Python handlers, everything
+else → `public/`) so you can test the dashboard without the Vercel CLI.
 
 ### Run the local Streamlit UI (legacy)
 
