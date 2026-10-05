@@ -58,8 +58,7 @@ NFLResultPredictor/
 │   │   ├── refresh_all.py      # Full retrain pipeline
 │   │   ├── get_week.py         # CLI wrapper for predictions
 │   │   ├── backtest.py         # Score the model vs completed seasons
-│   │   ├── build_team_assets.py # Download team logos + write public/teams.json
-│   │   └── serve_streamlit.py  # Legacy local Streamlit UI
+│   │   └── build_team_assets.py # Download team logos + write public/teams.json
 │   ├── src/
 │   │   ├── data.py             # Schedule fetching & I/O (cwd-independent paths)
 │   │   ├── features.py         # Feature engineering
@@ -68,7 +67,6 @@ NFLResultPredictor/
 │   └── requirements.txt        # Model-pipeline deps (pinned)
 ├── Season25/                    # Prior season (kept for history)
 ├── devserver.py                # Local preview (emulates vercel.json routing)
-├── requirements.txt            # Streamlit dashboard deps
 └── vercel.json
 ```
 
@@ -143,13 +141,6 @@ python devserver.py            # http://localhost:8000
 
 Emulates the `vercel.json` routing (`/api/*` → the Python handlers, everything
 else → `public/`) so you can test the dashboard without the Vercel CLI.
-
-### Run the local Streamlit UI (legacy)
-
-```bash
-pip install -r requirements.txt
-streamlit run Season26/scripts/serve_streamlit.py
-```
 
 ---
 
