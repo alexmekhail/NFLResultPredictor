@@ -5,6 +5,11 @@ combinations predict winners best.
 Every feature for a game is computed only from games played *before* it, so a
 backtest never peeks at the result it is predicting.
 
+Lookback rule: predictions for season S use only data from S itself (games
+already played) and the LOOKBACK_SEASONS seasons before it. `season_windows`
+rebuilds every feature — Elo, rolling stats, win %, QB and injury history —
+from that slice alone, and the model trains only on those prior seasons.
+
 Data (cached under data/interim/, re-fetchable):
   - schedules (scores, betting line, rest, location) via nfl_data_py
   - nflverse team-game stats CSVs (turnovers, TDs, EPA, yards, sacks, penalties)
@@ -42,7 +47,18 @@ FEATURE_GROUPS = {
     "elo":        ["elo_diff"],
     "rest":       ["rest_diff"],
 }
-BASE_FEATURES = ["home_field"]  # 1 = true home game, 0 = neutral site
+# Built by src/qb_injury_features.py; only present when run with extras=True.
+QB_INJURY_GROUPS = {
+    "qb_change":      ["qb_change_diff"],
+    "qb_experience":  ["qb_starts_diff"],
+    "qb_quality":     ["qb_epa_diff"],
+    "qb_vs_team":     ["qb_vs_team_diff"],
+    "injuries_count": ["inj_count_diff"],
+    "injuries_snap":  ["inj_off_diff", "inj_def_diff"],
+}
+ALL_GROUPS = {**FEATURE_GROUPS, **QB_INJURY_GROUPS}
+BASE_FEATURES = ["home_field"]
+LOOKBACK_SEASONS = 3  # 1 = true home game, 0 = neutral site
 
 ROLLING_STATS = [
     "giveaways", "takeaways", "tds_for", "tds_against", "pts_margin",
@@ -156,8 +172,9 @@ def pregame_team_features(tg: pd.DataFrame, window: int = 8, win_seasons: int = 
 
 
 def elo_ratings(schedule: pd.DataFrame, k: float = 20.0, hfa: float = 48.0,
-                revert: float = 1 / 3) -> pd.DataFrame:
-    """Pre-game Elo for every completed game (538-style margin multiplier)."""
+                revert: float = 1 / 3, return_final: bool = False):
+    """Pre-game Elo for every completed game (538-style margin multiplier).
+    With return_final, also returns each team's rating after its last game."""
     g = schedule[schedule["home_score"].notna()].sort_values(["gameday", "game_id"])
     elo, last_season, out = {}, {}, []
     for r in g.itertuples():
@@ -178,7 +195,8 @@ def elo_ratings(schedule: pd.DataFrame, k: float = 20.0, hfa: float = 48.0,
         delta = k * mult * (res_h - exp_h)
         elo[h] += delta
         elo[a] -= delta
-    return pd.DataFrame(out, columns=["game_id", "elo_diff"])
+    df = pd.DataFrame(out, columns=["game_id", "elo_diff"])
+    return (df, elo) if return_final else df
 
 
 # ── game matrix ───────────────────────────────────────────────────────────────
@@ -212,17 +230,68 @@ def game_matrix(schedule: pd.DataFrame, stats: pd.DataFrame,
     return g[cols].reset_index(drop=True)
 
 
+def upcoming_matrix(schedule: pd.DataFrame, stats: pd.DataFrame, upcoming: pd.DataFrame,
+                    window: int = 8, win_seasons: int = 3) -> pd.DataFrame:
+    """Features for unplayed games, using each team's state *as of now*
+    (every completed game in `schedule`). `upcoming` needs game_id, season,
+    week, home_team, away_team, location, home_rest, away_rest, spread_line."""
+    tg = team_games(schedule, stats)
+    season = int(upcoming["season"].max())
+    # One placeholder row per team after its last game: the shifted rolling
+    # stats / win % on that row are the team's current pre-game values.
+    teams = sorted(set(upcoming["home_team"].replace(RELOCATED)) | set(upcoming["away_team"].replace(RELOCATED)))
+    now = pd.DataFrame({"game_id": "NEXT", "season": season, "week": 99,
+                        "gameday": "9999-12-31", "team": teams})
+    tg = pregame_team_features(pd.concat([tg, now], ignore_index=True), window, win_seasons)
+    cur = tg[tg["game_id"] == "NEXT"].set_index("team")
+    _, elo = elo_ratings(schedule, return_final=True)
+
+    g = upcoming.copy()
+    for c in ("home_team", "away_team"):
+        g[c] = g[c].replace(RELOCATED)
+    h, a = cur.loc[g["home_team"]], cur.loc[g["away_team"]]
+    for s in ROLLING_STATS:
+        g[f"{s}_diff"] = h[f"roll_{s}"].values - a[f"roll_{s}"].values
+    g["winpct_diff"] = h["winpct"].values - a["winpct"].values
+    g["rest_diff"] = g["home_rest"] - g["away_rest"]
+    g["home_field"] = (g["location"] != "Neutral").astype(float)
+    g["elo_diff"] = [elo.get(x, 1500.0) - elo.get(y, 1500.0) for x, y in zip(g["home_team"], g["away_team"])]
+    return g.reset_index(drop=True)
+
+
 # ── backtest ──────────────────────────────────────────────────────────────────
 
-def walk_forward(games: pd.DataFrame, features, test_seasons, train_window: int = 3,
-                 C: float = 1.0, return_preds: bool = False) -> dict:
-    """For each test season S: fit on seasons [S-train_window, S-1], predict S.
+def season_windows(schedule: pd.DataFrame, stats: pd.DataFrame, test_seasons,
+                   lookback: int = LOOKBACK_SEASONS, window: int = 8, win_seasons: int = 3,
+                   extras=None) -> dict:
+    """{S: game matrix built only from seasons [S - lookback, S]}.
 
-    Returns pooled accuracy / log loss / Brier and per-season accuracy.
+    `extras(schedule_slice, seasons)` may return game_id + extra feature columns
+    (QB / injuries), also computed from the slice only.
     """
+    if win_seasons > lookback:
+        raise ValueError(f"win_seasons={win_seasons} reaches past the {lookback}-season lookback")
+    out = {}
+    for s in test_seasons:
+        seasons = list(range(s - lookback, s + 1))
+        sch = schedule[schedule["season"].isin(seasons)]
+        st = stats[stats["season"].isin(seasons)]
+        g = game_matrix(sch, st, window=window, win_seasons=win_seasons)
+        if extras is not None:
+            g = g.merge(extras(sch, seasons), on="game_id", how="left")
+        out[s] = g
+    return out
+
+
+def walk_forward(windows: dict, features, test_seasons, train_window: int = LOOKBACK_SEASONS,
+                 C: float = 1.0, return_preds: bool = False) -> dict:
+    """For each test season S: fit on seasons [S-train_window, S-1] of S's
+    window, predict S. Returns pooled accuracy / log loss / Brier and
+    per-season accuracy."""
     cols = BASE_FEATURES + list(features)
     probs, ys, ids, per_season = [], [], [], {}
     for s in test_seasons:
+        games = windows[s]
         tr = games[games["season"].between(s - train_window, s - 1)].dropna(subset=cols)
         te = games[games["season"] == s].dropna(subset=cols)
         if tr.empty or te.empty:
@@ -256,4 +325,4 @@ def all_combinations(groups=None, max_size=None):
 
 
 def group_columns(combo):
-    return [c for g in combo for c in FEATURE_GROUPS[g]]
+    return [c for g in combo for c in ALL_GROUPS[g]]
