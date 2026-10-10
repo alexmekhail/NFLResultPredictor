@@ -184,6 +184,8 @@ def grade_week(week: int, threshold: float = 0.5, schedule: pd.DataFrame | None 
             "kickoff": _kickoff(s) if len(s) else None,
             "weekday": _clean(s.get("weekday")) if len(s) else None,
             "spread_home": _clean(row.get("spread_home")),
+            # "projected" = no line was posted yet; spread estimated from earlier weeks
+            "spread_source": _clean(row.get("spread_source")) or "posted",
             "predicted_winner": row["predicted_winner"],
             "home_win_prob": round(float(row["home_win_prob"]), 4),
             "predicted_win_prob": round(float(row["predicted_win_prob"]), 4),

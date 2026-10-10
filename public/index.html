@@ -370,7 +370,9 @@
               </div>
               <div class="mt-2 text-[11px] text-zinc-500 flex gap-3">
                 <span>Confidence ${pct(g.confidence)}</span>
-                ${g.spread_home != null ? `<span>Spread ${spreadText(g)}</span>` : ''}
+                ${g.spread_home != null ? (g.spread_source === 'projected'
+                  ? `<span title="No betting line posted yet — spread projected from earlier weeks' lines">Proj. spread ${spreadText(g)}</span>`
+                  : `<span>Spread ${spreadText(g)}</span>`) : ''}
               </div>
             </div>
           </div>

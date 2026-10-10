@@ -8,7 +8,7 @@ import argparse
 import joblib
 import pandas as pd
 from src.data import load_config, download_raw
-from src.features import basic_game_features
+from src.features import basic_game_features, project_spreads
 
 def main(season: int, week: int, threshold: float | None = None):
     cfg = load_config()
@@ -16,7 +16,10 @@ def main(season: int, week: int, threshold: float | None = None):
     prob_thresh = threshold if threshold is not None else float(cfg["output"].get("prob_threshold", 0.5))
 
     raw = download_raw(season, paths)
-    feats = basic_game_features(raw["schedule"])
+    # Weeks whose betting lines aren't out yet get a spread projected from the
+    # lines posted in earlier weeks, then go through the same model.
+    schedule = project_spreads(raw["schedule"], before_week=week)
+    feats = basic_game_features(schedule)
 
     # Filter to requested week
     upcoming = feats[feats["week" ] == week].copy()
@@ -42,13 +45,16 @@ def main(season: int, week: int, threshold: float | None = None):
 
     # Save & display
     out_path = f"{paths['processed']}/predictions_{season}_wk{week}.csv"
-    cols = ["week", "home_team", "away_team", "home_win_prob", "pred_home_win", "predicted_winner", "confidence"]
+    cols = ["week", "home_team", "away_team", "spread_home", "spread_source", "home_win_prob", "predicted_winner", "confidence"]
     upcoming.to_csv(out_path, index=False)
 
     # Pretty print
     view = upcoming[cols].copy()
     view["home_win_prob"] = view["home_win_prob"].round(3)
     view["confidence"] = view["confidence"].round(3)
+    n_proj = int((upcoming["spread_source"] == "projected").sum())
+    if n_proj:
+        print(f"Note: {n_proj}/{len(upcoming)} games use a projected spread (no posted line yet).")
     print(f"Threshold = {prob_thresh}. Saved predictions to {out_path}\n")
     print(view.to_string(index=False))
 
