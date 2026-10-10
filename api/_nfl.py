@@ -11,6 +11,7 @@ automatically — no change to the committed prediction files.
 import glob
 import math
 import re
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -82,6 +83,44 @@ def load_schedule() -> pd.DataFrame:
     return pd.DataFrame()
 
 
+def today_eastern() -> date:
+    """Today's date in US Eastern, the clock the NFL schedule runs on."""
+    try:
+        from zoneinfo import ZoneInfo
+        return datetime.now(ZoneInfo("America/New_York")).date()
+    except Exception:
+        # No tz database available: EST is close enough for picking a week.
+        return datetime.now(timezone(timedelta(hours=-5))).date()
+
+
+def week_end_dates(schedule: pd.DataFrame) -> dict:
+    """{week: last gameday} for regular-season weeks in the schedule.
+
+    An NFL week runs Tuesday through Monday Night Football, so a week is over
+    once the date passes its last game (usually MNF) — Tuesday is next week.
+    """
+    if schedule.empty or not {"week", "gameday"} <= set(schedule.columns):
+        return {}
+    df = schedule
+    if "game_type" in df.columns:
+        df = df[df["game_type"] == "REG"]
+    days = pd.to_datetime(df["gameday"], errors="coerce")
+    ends = days.groupby(df["week"]).max().dropna()
+    return {int(w): d.date() for w, d in ends.items()}
+
+
+def current_week_by_date(schedule: pd.DataFrame, today: date | None = None) -> int | None:
+    """The NFL week `today` falls in, or the last week once the season is over."""
+    ends = week_end_dates(schedule)
+    if not ends:
+        return None
+    today = today or today_eastern()
+    for w in sorted(ends):
+        if today <= ends[w]:
+            return w
+    return max(ends)
+
+
 def _kickoff(row) -> str | None:
     day = _clean(row.get("gameday"))
     if not day:
@@ -145,6 +184,8 @@ def grade_week(week: int, threshold: float = 0.5, schedule: pd.DataFrame | None 
             "kickoff": _kickoff(s) if len(s) else None,
             "weekday": _clean(s.get("weekday")) if len(s) else None,
             "spread_home": _clean(row.get("spread_home")),
+            # "projected" = no line was posted yet; spread estimated from earlier weeks
+            "spread_source": _clean(row.get("spread_source")) or "posted",
             "predicted_winner": row["predicted_winner"],
             "home_win_prob": round(float(row["home_win_prob"]), 4),
             "predicted_win_prob": round(float(row["predicted_win_prob"]), 4),
@@ -175,11 +216,14 @@ def _record(graded: int, correct: int) -> dict:
     }
 
 
-def season_summary(threshold: float = 0.5) -> dict:
+def season_summary(threshold: float = 0.5, today: date | None = None) -> dict:
     """weeks list, which week to land on, previous week, and records."""
     files = week_files()
-    weeks = list(files)
     schedule = load_schedule()
+    by_date = current_week_by_date(schedule, today)
+    # Show the current week even before its predictions are committed, so the
+    # dashboard still lands on (and labels) the real week.
+    weeks = sorted(set(files) | ({by_date} if by_date else set()))
 
     by_week = {}
     overall_graded = overall_correct = 0
@@ -196,11 +240,13 @@ def season_summary(threshold: float = 0.5) -> dict:
         }
         overall_graded += gw["record"]["graded"]
         overall_correct += gw["record"]["correct"]
-        # "current" = earliest week that still has an unplayed game
+        # Fallback when the schedule has no dates: earliest week with an unplayed game
         if current is None and n_final < len(gw["games"]):
             current = w
 
-    if current is None:
+    if by_date is not None:
+        current = by_date
+    elif current is None:
         current = weeks[-1] if weeks else None
 
     previous = None
