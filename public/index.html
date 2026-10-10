@@ -111,6 +111,10 @@
     const pct = v => (v == null ? '—' : (v * 100).toFixed(0) + '%');
     const pct1 = v => (v == null ? '—' : (v * 100).toFixed(1) + '%');
 
+    // green = at or above the ~68% "pick the favorite" backtest, amber = better than a coin flip
+    const accColor = v => v == null ? 'text-zinc-500'
+      : v >= 0.68 ? 'text-green-400' : v >= 0.5 ? 'text-amber-400' : 'text-red-400';
+
     function teamName(abbr) {
       const t = state.teams[abbr];
       return t ? t.name : abbr;
@@ -218,19 +222,27 @@
         const b = document.createElement('button');
         b.type = 'button';
         b.className = [
-          'shrink-0 rounded-lg px-3 py-1.5 text-sm border transition-colors',
+          'shrink-0 min-w-[4.75rem] rounded-lg px-3 py-1.5 text-sm border transition-colors flex flex-col items-center leading-tight',
           active ? 'bg-green-500 border-green-500 text-zinc-950 font-semibold'
                  : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-zinc-600',
         ].join(' ');
-        let label = `Week ${w}`;
-        if (rec && (rec.graded ?? 0) > 0 && rec.final === rec.games) {
-          label += ` · ${rec.correct}/${rec.graded}`;
-        } else if (isCurrent) {
-          label += ' · now';
+        const graded = rec && (rec.graded ?? 0) > 0;
+        let sub = '';
+        if (isCurrent) {
+          sub = `<span class="${active ? 'text-zinc-900' : 'text-green-400'} font-semibold">● now</span>`;
+        } else if (graded) {
+          sub = `<span class="tabular-nums ${active ? 'text-zinc-900' : accColor(rec.accuracy)}">${pct(rec.accuracy)}</span>`;
+        } else {
+          sub = `<span class="${active ? 'text-zinc-800' : 'text-zinc-600'}">—</span>`;
         }
-        b.textContent = label;
+        b.innerHTML = `<span>Week ${w}</span><span class="text-[11px] mt-0.5">${sub}</span>`;
+        b.title = graded ? `${rec.correct}/${rec.graded} picks correct (${pct1(rec.accuracy)})` : '';
         b.onclick = () => loadWeek(w);
         wrap.appendChild(b);
+        // keep the selected week visible in the strip without scrolling the page
+        if (active) requestAnimationFrame(() => {
+          wrap.scrollLeft = b.offsetLeft - wrap.offsetLeft - (wrap.clientWidth - b.offsetWidth) / 2;
+        });
       });
     }
 
@@ -358,7 +370,9 @@
               </div>
               <div class="mt-2 text-[11px] text-zinc-500 flex gap-3">
                 <span>Confidence ${pct(g.confidence)}</span>
-                ${g.spread_home != null ? `<span>Spread ${spreadText(g)}</span>` : ''}
+                ${g.spread_home != null ? (g.spread_source === 'projected'
+                  ? `<span title="No betting line posted yet — spread projected from earlier weeks' lines">Proj. spread ${spreadText(g)}</span>`
+                  : `<span>Spread ${spreadText(g)}</span>`) : ''}
               </div>
             </div>
           </div>

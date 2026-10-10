@@ -20,3 +20,7 @@ venv/
 
 # Node
 node_modules/
+
+# Feature-lab download cache (re-fetchable)
+Season*/data/interim/*
+!Season*/data/interim/.gitkeep

@@ -1,0 +1,27 @@
+{
+  "groups": [
+    "spread",
+    "turnovers",
+    "qb_quality",
+    "qb_vs_team",
+    "qb_change"
+  ],
+  "columns": [
+    "home_field",
+    "spread_line",
+    "giveaways_diff",
+    "takeaways_diff",
+    "qb_epa_diff",
+    "qb_vs_team_diff",
+    "qb_change_diff"
+  ],
+  "season": 2026,
+  "train_seasons": [
+    2023,
+    2024,
+    2025
+  ],
+  "n_train": 838,
+  "window": 8,
+  "win_seasons": 3
+}

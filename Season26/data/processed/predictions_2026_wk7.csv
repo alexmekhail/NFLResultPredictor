@@ -1,0 +1,15 @@
+game_id,week,home_team,away_team,spread_home,spread_source,home_win_prob,predicted_winner,confidence,model,qb_assumed
+2026_07_NYG_HOU,7,HOU,NYG,-8.5,projected,0.809807398094921,HOU,0.6196147961898419,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_07_LA_LV,7,LV,LA,6.5,projected,0.2982716367408039,LA,0.40345672651839215,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_07_DEN_ARI,7,ARI,DEN,5.0,projected,0.30451570615839596,DEN,0.3909685876832081,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_07_GB_DET,7,DET,GB,-4.5,projected,0.648575406153028,DET,0.297150812306056,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_07_MIA_NYJ,7,NYJ,MIA,-4.5,projected,0.6303606178317087,NYJ,0.2607212356634174,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_07_PIT_NO,7,NO,PIT,2.5,projected,0.623101040461361,NO,0.2462020809227221,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_07_TB_CAR,7,CAR,TB,-3.0,projected,0.6123190586288181,CAR,0.22463811725763616,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_07_SF_ATL,7,ATL,SF,4.0,projected,0.3981062173172105,SF,0.20378756536557896,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_07_NE_CHI,7,CHI,NE,-1.0,projected,0.40228189833911304,NE,0.19543620332177392,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_07_DAL_PHI,7,PHI,DAL,-1.5,projected,0.5669820196808093,PHI,0.1339640393616186,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_07_IND_MIN,7,MIN,IND,-2.5,projected,0.5546257403045827,MIN,0.10925148060916534,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_07_CLE_TEN,7,TEN,CLE,-0.5,projected,0.45626868264729936,CLE,0.08746263470540128,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_07_KC_SEA,7,SEA,KC,-2.0,projected,0.531001209428595,SEA,0.062002418857189934,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_07_CIN_BAL,7,BAL,CIN,-1.0,projected,0.521947778901328,BAL,0.04389555780265608,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
