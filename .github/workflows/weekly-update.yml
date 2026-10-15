@@ -22,6 +22,9 @@ jobs:
   update:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash   # explicit bash = -eo pipefail, so a failing script isn't hidden by tee
     steps:
       - uses: actions/checkout@v4
 
@@ -44,7 +47,7 @@ jobs:
           restore-keys: feature-lab-
 
       - name: Refresh results and predictions
-        run: python Season26/scripts/weekly_update.py | tee update.log
+        run: python Season26/scripts/weekly_update.py | tee "$RUNNER_TEMP/update.log"
 
       # Same guard as the old local task: only the schedule, prediction CSVs
       # for weeks with no game played yet, and the lab model may change.
@@ -89,7 +92,7 @@ jobs:
           {
             echo "## Weekly update"
             echo '```'
-            grep -E "Schedule refreshed|Not regenerating|No unstarted|Regular season|^Week|UPSET" update.log || true
+            grep -E "Schedule refreshed|Not regenerating|No unstarted|Regular season|^Week|UPSET" "$RUNNER_TEMP/update.log" || true
             echo '```'
             (cd api && python - <<'PY'
           import _nfl
