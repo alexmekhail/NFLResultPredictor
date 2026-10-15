@@ -1,0 +1,124 @@
+# Weekly refresh: grade finished games and re-predict upcoming weeks, then
+# commit straight to main so Vercel redeploys the dashboard.
+#
+# Runs Tuesday (results final after Monday Night Football) and Saturday
+# (late line / starting-QB news) at 16:00 UTC = 9 AM PDT / 8 AM PST.
+# GitHub may start scheduled runs a few minutes late.
+name: Weekly update
+
+on:
+  schedule:
+    - cron: "0 16 * * 2,6"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: weekly-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: Season26/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r Season26/requirements.txt
+
+      # Past-season downloads never change; the in-progress season is
+      # re-fetched by predict_lab.py every run regardless of the cache.
+      - name: Restore download cache
+        uses: actions/cache@v4
+        with:
+          path: Season26/data/interim/feature_lab
+          key: feature-lab-${{ github.run_id }}
+          restore-keys: feature-lab-
+
+      - name: Refresh results and predictions
+        run: python Season26/scripts/weekly_update.py | tee update.log
+
+      # Same guard as the old local task: only the schedule, prediction CSVs
+      # for weeks with no game played yet, and the lab model may change.
+      - name: Check what changed
+        id: changes
+        run: |
+          python - <<'PY'
+          import glob, os, re, subprocess, sys
+          import pandas as pd
+
+          changed = subprocess.run(
+              ["git", "status", "--porcelain"], capture_output=True, text=True, check=True
+          ).stdout.splitlines()
+          paths = [line[3:] for line in changed]
+          allowed = re.compile(
+              r"^Season26/(data/raw/schedule_\d{4}\.csv"
+              r"|data/processed/predictions_\d{4}_wk\d+\.csv"
+              r"|models/artifacts/lab_model\.(pkl|json))$"
+          )
+          bad = [p for p in paths if not allowed.match(p)]
+          if bad:
+              sys.exit(f"Unexpected files changed: {bad}")
+
+          sched = pd.read_csv(max(glob.glob("Season26/data/raw/schedule_[0-9][0-9][0-9][0-9].csv")))
+          reg = sched[sched["game_type"] == "REG"]
+          started = set(reg.loc[reg["home_score"].notna(), "week"].astype(int))
+          weeks = sorted({int(m.group(1)) for p in paths
+                          if (m := re.search(r"_wk(\d+)\.csv$", p))})
+          touched_started = [w for w in weeks if w in started]
+          if touched_started:
+              sys.exit(f"Predictions changed for week(s) already in progress: {touched_started}")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"any={'true' if paths else 'false'}\n")
+              f.write(f"weeks={','.join(map(str, weeks))}\n")
+          print("Changed:", paths or "nothing")
+          PY
+
+      - name: Write run summary
+        if: always()
+        run: |
+          {
+            echo "## Weekly update"
+            echo '```'
+            grep -E "Schedule refreshed|Not regenerating|No unstarted|Regular season|^Week|UPSET" update.log || true
+            echo '```'
+            (cd api && python - <<'PY'
+          import _nfl
+          s = _nfl.season_summary()
+          r, prev = s["records"], s["previous_week"]
+          print(f"Current week: {s['current_week']}  ")
+          if prev is not None:
+              w = r["by_week"][str(prev)]
+              acc = f"{w['accuracy']:.1%}" if w["accuracy"] is not None else "-"
+              print(f"Week {prev}: {w['correct']}/{w['graded']} correct ({acc})  ")
+          o = r["overall"]
+          if o["graded"]:
+              print(f"Season: {o['correct']}/{o['graded']} correct ({o['accuracy']:.1%})")
+          PY
+            )
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit and push
+        if: steps.changes.outputs.any == 'true'
+        run: |
+          cd api
+          PREV=$(python -c "import _nfl; print(_nfl.season_summary()['previous_week'] or '')")
+          cd ..
+          WEEKS="${{ steps.changes.outputs.weeks }}"
+          MSG="Weekly update: refresh results"
+          [ -n "$PREV" ] && MSG="Weekly update: week $PREV results"
+          [ -n "$WEEKS" ] && MSG="$MSG, re-predict weeks ${WEEKS//,/, }"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A Season26/data Season26/models
+          git commit -m "$MSG"
+          git push
