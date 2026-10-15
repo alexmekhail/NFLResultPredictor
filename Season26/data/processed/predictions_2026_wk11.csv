@@ -4,11 +4,11 @@ game_id,week,home_team,away_team,spread_home,spread_source,home_win_prob,predict
 2026_11_TEN_DAL,11,DAL,TEN,-9.0,projected,0.7889396353975474,DAL,0.5778792707950948,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_11_NYJ_LAC,11,LAC,NYJ,-5.5,projected,0.7764890766653673,LAC,0.5529781533307345,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_11_MIN_SF,11,SF,MIN,-2.5,projected,0.771673765475881,SF,0.5433475309517619,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_11_LV_DEN,11,DEN,LV,-8.5,projected,0.7679340478699692,DEN,0.5358680957399384,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_11_LV_DEN,11,DEN,LV,-8.0,projected,0.7536100901108156,DEN,0.5072201802216312,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_11_JAX_NYG,11,NYG,JAX,6.5,projected,0.2737453530277111,JAX,0.45250929394457784,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_11_NO_CHI,11,CHI,NO,-5.5,projected,0.7036944335852375,CHI,0.40738886717047507,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_11_TB_DET,11,DET,TB,-7.0,projected,0.6991163235200567,DET,0.3982326470401134,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_11_CIN_WAS,11,WAS,CIN,4.0,projected,0.3134821326788767,CIN,0.3730357346422466,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_11_NO_CHI,11,CHI,NO,-5.0,projected,0.6870213868692271,CHI,0.3740427737384542,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_11_CIN_WAS,11,WAS,CIN,4.0,projected,0.3134821326788766,CIN,0.3730357346422468,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_11_IND_HOU,11,HOU,IND,-4.5,projected,0.6511380177803091,HOU,0.3022760355606182,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_11_PIT_PHI,11,PHI,PIT,-2.5,projected,0.5572139688950905,PHI,0.1144279377901809,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_11_BAL_CAR,11,CAR,BAL,1.5,projected,0.4999779714378709,BAL,4.4057124258145564e-05,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_11_BAL_CAR,11,CAR,BAL,1.0,projected,0.5196484517657646,CAR,0.03929690353152915,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_11_PIT_PHI,11,PHI,PIT,-1.5,projected,0.5180965489771304,PHI,0.036193097954260844,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True

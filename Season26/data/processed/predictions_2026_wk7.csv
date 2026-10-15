@@ -6,10 +6,10 @@ game_id,week,home_team,away_team,spread_home,spread_source,home_win_prob,predict
 2026_07_PIT_NO,7,NO,PIT,2.5,posted,0.6559125565457432,NO,0.3118251130914864,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_07_SF_ATL,7,ATL,SF,4.5,posted,0.36178109730946884,SF,0.27643780538106233,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_07_TB_CAR,7,CAR,TB,-3.0,posted,0.6123190586288181,CAR,0.22463811725763616,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_07_MIA_NYJ,7,NYJ,MIA,-4.5,posted,0.6111219311102112,NYJ,0.22224386222042236,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_07_MIA_NYJ,7,NYJ,MIA,-4.5,posted,0.6111219311102111,NYJ,0.22224386222042214,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_07_CLE_TEN,7,TEN,CLE,1.5,posted,0.3924424663844083,CLE,0.21511506723118345,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_07_GB_DET,7,DET,GB,-3.0,posted,0.5898301437837005,DET,0.17966028756740093,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_07_GB_DET,7,DET,GB,-3.0,posted,0.5898301437837004,DET,0.1796602875674007,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_07_KC_SEA,7,SEA,KC,-2.5,posted,0.5888803805590125,SEA,0.17776076111802497,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_07_DAL_PHI,7,PHI,DAL,-1.5,posted,0.5568039823371407,PHI,0.11360796467428136,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_07_CIN_BAL,7,BAL,CIN,-3.5,posted,0.5457638894536776,BAL,0.0915277789073552,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_07_DAL_PHI,7,PHI,DAL,-1.0,projected,0.5373002472345046,PHI,0.07460049446900929,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_07_NE_CHI,7,CHI,NE,-1.5,posted,0.5129007499150016,CHI,0.025801499830003127,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
