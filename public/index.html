@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NFL Result Predictor</title>
-  <meta name="description" content="Weekly NFL win probabilities and predicted winners from a logistic-regression model on betting spreads.">
+  <meta name="description" content="Weekly NFL win probabilities and predicted winners from a logistic-regression model on the betting line, turnovers and quarterback form.">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = { darkMode: 'class' };
@@ -36,7 +36,7 @@
           <span class="text-green-400">●</span> NFL Result Predictor
         </h1>
         <p class="text-zinc-400 text-sm mt-1">
-          Predicted winners &amp; win probabilities · logistic regression on betting spreads
+          Predicted winners &amp; win probabilities · logistic regression on the betting line, turnovers &amp; QB form
         </p>
       </div>
       <div id="seasonRecord" class="shrink-0 rounded-xl border border-zinc-800 bg-zinc-900/70 px-4 py-2 text-sm">
@@ -94,7 +94,7 @@
     </div>
 
     <footer class="mt-12 text-center text-xs text-zinc-600">
-      Model &amp; data via <span class="text-zinc-500">nfl_data_py</span>. Predictions are generated before kickoff and not updated after.
+      Data via <span class="text-zinc-500">nflverse</span>. Upcoming weeks are re-predicted every Tuesday and Saturday; a week’s picks are locked once its first game has been played.
     </footer>
   </div>
 

@@ -7,8 +7,6 @@ train_seasons:
 features:
   rolling_window_games: 5
   elo_k: 20
-  include_injuries: false
-  include_weather: false
 model:
   type: logistic_regression
   test_size: 0.2
