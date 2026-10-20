@@ -1,0 +1,16 @@
+game_id,week,home_team,away_team,spread_home,spread_source,home_win_prob,predicted_winner,confidence,model,qb_assumed
+2026_14_NYG_SEA,14,SEA,NYG,-11.0,projected,0.850469883128438,SEA,0.7009397662568759,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_14_TEN_DET,14,DET,TEN,-11.0,projected,0.8366968648481541,DET,0.6733937296963082,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_14_CHI_MIA,14,MIA,CHI,7.0,projected,0.2196885666817377,CHI,0.5606228666365246,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_14_DEN_NYJ,14,NYJ,DEN,5.0,projected,0.27184074053112417,DEN,0.45631851893775166,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_14_HOU_WAS,14,WAS,HOU,4.0,projected,0.2850661294217242,HOU,0.4298677411565516,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_14_PIT_JAX,14,JAX,PIT,-5.0,projected,0.6514817071749432,JAX,0.3029634143498865,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_14_BUF_GB,14,GB,BUF,2.5,projected,0.3495711034493053,BUF,0.3008577931013894,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_14_TB_BAL,14,BAL,TB,-6.0,projected,0.6375627976024161,BAL,0.27512559520483215,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_14_MIN_NE,14,NE,MIN,-2.0,projected,0.6249469401404152,NE,0.24989388028083037,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_14_NO_CAR,14,CAR,NO,-4.0,projected,0.6157682828199941,CAR,0.23153656563998815,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_14_LAC_LV,14,LV,LAC,1.5,projected,0.3922189400933944,LAC,0.21556211981321116,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_14_ATL_CLE,14,CLE,ATL,1.0,projected,0.4322084695050283,ATL,0.13558306098994344,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_14_IND_PHI,14,PHI,IND,-2.0,projected,0.4913364629696647,IND,0.017327074060670578,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_14_KC_CIN,14,CIN,KC,0.5,projected,0.49346904862876334,KC,0.01306190274247332,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_14_LA_SF,14,SF,LA,0.0,projected,0.49562329498310964,LA,0.008753410033780717,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
