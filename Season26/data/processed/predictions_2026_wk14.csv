@@ -1,11 +1,11 @@
 game_id,week,home_team,away_team,spread_home,spread_source,home_win_prob,predicted_winner,confidence,model,qb_assumed
-2026_14_NYG_SEA,14,SEA,NYG,-9.5,projected,0.8256186747712408,SEA,0.6512373495424817,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_14_NYG_SEA,14,SEA,NYG,-9.5,projected,0.8167129413551734,SEA,0.6334258827103467,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_14_CHI_MIA,14,MIA,CHI,7.0,projected,0.20030831946631175,CHI,0.5993833610673764,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_14_TEN_DET,14,DET,TEN,-11.0,projected,0.7978416702356406,DET,0.5956833404712811,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_14_PIT_JAX,14,JAX,PIT,-6.0,projected,0.7068175814872338,JAX,0.4136351629744677,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_14_DEN_NYJ,14,NYJ,DEN,5.5,projected,0.3055361391034391,DEN,0.38892772179312185,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_14_MIN_NE,14,NE,MIN,-2.5,projected,0.6639747650636707,NE,0.3279495301273414,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_14_HOU_WAS,14,WAS,HOU,4.5,projected,0.3395260531046268,HOU,0.3209478937907464,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_14_DEN_NYJ,14,NYJ,DEN,5.0,projected,0.32249055530604714,DEN,0.3550188893879057,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_14_MIN_NE,14,NE,MIN,-2.0,projected,0.6461904426240386,NE,0.29238088524807715,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_14_HOU_WAS,14,WAS,HOU,4.5,projected,0.3582608218332629,HOU,0.2834783563334742,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_14_BUF_GB,14,GB,BUF,3.0,projected,0.38259631957089973,BUF,0.23480736085820053,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_14_NO_CAR,14,CAR,NO,-3.5,projected,0.6088731233200294,CAR,0.21774624664005882,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_14_ATL_CLE,14,CLE,ATL,1.0,projected,0.4158727532080943,ATL,0.1682544935838114,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True

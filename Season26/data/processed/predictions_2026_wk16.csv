@@ -1,10 +1,10 @@
 game_id,week,home_team,away_team,spread_home,spread_source,home_win_prob,predicted_winner,confidence,model,qb_assumed
 2026_16_LAC_MIA,16,MIA,LAC,4.0,projected,0.2639950434414914,LAC,0.47200991311701723,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_16_WAS_MIN,16,MIN,WAS,-5.5,projected,0.7100863000817184,MIN,0.4201726001634367,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_16_TEN_LV,16,LV,TEN,-5.5,projected,0.7046799823245128,LV,0.4093599646490256,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_16_NYG_DET,16,DET,NYG,-7.5,projected,0.7037559126011098,DET,0.4075118252022196,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_16_NYG_DET,16,DET,NYG,-8.0,projected,0.7090270236963149,DET,0.41805404739262975,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_16_CLE_BAL,16,BAL,CLE,-6.5,projected,0.7002813574140712,BAL,0.4005627148281423,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_16_NE_NYJ,16,NYJ,NE,3.5,projected,0.30271436569853355,NE,0.3945712686029329,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_16_WAS_MIN,16,MIN,WAS,-5.5,projected,0.6921623412202522,MIN,0.38432468244050444,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_16_TEN_LV,16,LV,TEN,-5.0,projected,0.6880378071606,LV,0.37607561432120007,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_16_ARI_NO,16,NO,ARI,-3.0,projected,0.6785665357303486,NO,0.3571330714606973,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_16_CIN_IND,16,IND,CIN,4.0,projected,0.3619210674644028,CIN,0.27615786507119444,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_16_HOU_PHI,16,PHI,HOU,4.0,projected,0.3710221676987606,HOU,0.25795566460247876,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True

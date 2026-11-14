@@ -2,12 +2,12 @@ game_id,week,home_team,away_team,spread_home,spread_source,home_win_prob,predict
 2026_13_MIA_DEN,13,DEN,MIA,-11.5,projected,0.8446556514202802,DEN,0.6893113028405604,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_13_CIN_CLE,13,CLE,CIN,5.5,projected,0.2762970956544498,CIN,0.44740580869110036,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_13_DAL_SEA,13,SEA,DAL,-4.5,projected,0.7155110392519082,SEA,0.43102207850381635,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_13_SF_NYG,13,NYG,SF,5.5,projected,0.2957869184642078,SF,0.4084261630715844,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_13_SF_NYG,13,NYG,SF,5.5,projected,0.3093599109649269,SF,0.38128017807014625,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_13_KC_LA,13,LA,KC,-2.0,projected,0.6058377938471358,LA,0.21167558769427153,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_13_GB_NO,13,NO,GB,2.0,projected,0.4415830683946562,GB,0.11683386321068756,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_13_BUF_NE,13,NE,BUF,2.0,projected,0.4452236613997026,BUF,0.1095526772005948,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_13_CAR_MIN,13,MIN,CAR,-3.0,projected,0.5532498681839079,MIN,0.10649973636781573,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_13_WAS_TEN,13,TEN,WAS,2.5,projected,0.4679248727825851,WAS,0.0641502544348298,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_13_WAS_TEN,13,TEN,WAS,2.5,projected,0.4478333364796073,WAS,0.10433332704078535,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_13_GB_NO,13,NO,GB,1.5,projected,0.4610745999645023,GB,0.07785080007099543,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_13_DET_ATL,13,ATL,DET,2.5,projected,0.4845053707164694,DET,0.03098925856706125,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_13_HOU_PIT,13,PIT,HOU,1.5,projected,0.4856108098650116,HOU,0.02877838026997681,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_13_JAX_CHI,13,CHI,JAX,1.5,projected,0.5125524682435079,CHI,0.025104936487015728,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True

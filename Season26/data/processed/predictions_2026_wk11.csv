@@ -5,10 +5,10 @@ game_id,week,home_team,away_team,spread_home,spread_source,home_win_prob,predict
 2026_11_MIN_SF,11,SF,MIN,-3.5,posted,0.7995069292914628,SF,0.5990138585829257,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,False
 2026_11_IND_HOU,11,HOU,IND,-10.0,posted,0.7932973017581613,HOU,0.5865946035163225,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,False
 2026_11_LV_DEN,11,DEN,LV,-8.5,posted,0.7717230295581756,DEN,0.5434460591163512,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,False
-2026_11_JAX_NYG,11,NYG,JAX,6.0,posted,0.2778763765209573,JAX,0.4442472469580854,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,False
 2026_11_TEN_DAL,11,DAL,TEN,-7.5,posted,0.7126537258245605,DAL,0.4253074516491211,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,False
 2026_11_PIT_PHI,11,PHI,PIT,4.5,posted,0.2885110893987962,PIT,0.42297782120240757,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,False
-2026_11_CIN_WAS,11,WAS,CIN,3.5,posted,0.3120008624175732,CIN,0.3759982751648536,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,False
+2026_11_JAX_NYG,11,NYG,JAX,6.0,posted,0.292485218129527,JAX,0.415029563740946,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,False
+2026_11_CIN_WAS,11,WAS,CIN,3.5,posted,0.32895864189010016,CIN,0.3420827162197997,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,False
 2026_11_NYJ_LAC,11,LAC,NYJ,-1.5,posted,0.6267276343860222,LAC,0.2534552687720444,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,False
 2026_11_BAL_CAR,11,CAR,BAL,-1.5,posted,0.5941067631555019,CAR,0.18821352631100385,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,False
 2026_11_TB_DET,11,DET,TB,-3.5,posted,0.5552862538693979,DET,0.11057250773879579,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,False

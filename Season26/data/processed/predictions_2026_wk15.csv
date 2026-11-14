@@ -5,12 +5,12 @@ game_id,week,home_team,away_team,spread_home,spread_source,home_win_prob,predict
 2026_15_CHI_BUF,15,BUF,CHI,-5.0,projected,0.6557344424663244,BUF,0.3114688849326488,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_15_DEN_LV,15,LV,DEN,5.0,projected,0.37111585155072924,DEN,0.2577682968985415,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_15_IND_TEN,15,TEN,IND,3.0,projected,0.38734898656557293,IND,0.22530202686885414,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_15_CLE_NYG,15,NYG,CLE,-2.0,projected,0.59687346606451,NYG,0.19374693212901994,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_15_CLE_NYG,15,NYG,CLE,-2.0,projected,0.6105049843115143,NYG,0.22100996862302869,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_15_CIN_CAR,15,CAR,CIN,2.5,projected,0.4140344105435509,CIN,0.17193117891289822,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_15_NE_KC,15,KC,NE,-4.0,projected,0.5849773960905112,KC,0.1699547921810225,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_15_BAL_PIT,15,PIT,BAL,-1.0,projected,0.5815853868484844,PIT,0.16317077369696875,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_15_NO_TB,15,TB,NO,-2.5,projected,0.577286889158255,TB,0.15457377831650998,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_15_ATL_WAS,15,WAS,ATL,-0.0,projected,0.42359097384046895,ATL,0.1528180523190621,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
-2026_15_CIN_CAR,15,CAR,CIN,2.0,projected,0.43325338766694677,CIN,0.13349322466610647,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
+2026_15_ATL_WAS,15,WAS,ATL,-0.0,projected,0.44422596569004674,ATL,0.11154806861990652,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_15_SF_LAC,15,LAC,SF,3.0,projected,0.446212457469405,SF,0.10757508506118996,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_15_JAX_HOU,15,HOU,JAX,-0.0,projected,0.46047423361476547,JAX,0.07905153277046906,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
 2026_15_NYJ_ARI,15,ARI,NYJ,-1.0,projected,0.5210229999720384,ARI,0.04204599994407676,lab:spread+turnovers+qb_quality+qb_vs_team+qb_change,True
